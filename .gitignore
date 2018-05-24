@@ -1,0 +1,7 @@
+# Whitelisting
+/*
+!.gitignore
+!.bashrc
+!.vimrc
+!/.bash_scripts/
+!/.vim/
