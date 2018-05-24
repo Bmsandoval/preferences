@@ -3,6 +3,7 @@ Plug 'vim-scripts/vim-plug'
 Plug 'Valloric/YouCompleteMe'
 call plug#end()
 let g:ycm_global_ycm_extra_conf = "~/.vim/.ycm_extra_conf.py"
+colorscheme delek
 
 " All system-wide defaults are set in $VIMRUNTIME/debian.vim and sourced by
 " the call to :runtime you can find below.  If you wish to change any of those
