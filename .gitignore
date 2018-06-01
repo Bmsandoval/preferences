@@ -1,7 +1,8 @@
-# Blacklisting
+# Blacklist everything
 /*
-# Whitelisting
+# White as needed
 !.gitignore
+!.profile
 !.bashrc
 !.vimrc
 !/.scripts/
