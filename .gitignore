@@ -1,5 +1,6 @@
-# Whitelisting
+# Blacklisting
 /*
+# Whitelisting
 !.gitignore
 !.bashrc
 !.vimrc

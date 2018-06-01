@@ -127,8 +127,8 @@ fi
 alias serve='php artisan serve --port=8089'
 
 alias uu='sudo apt-get update && sudo apt-get upgrade'
-alias bash-edit='vim ~/.bashrc'
-alias bash-src='source ~/.bashrc'
+alias bash-edit='vim ~/.profile'
+alias bash-src='source ~/.profile'
 function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
 }
@@ -136,15 +136,39 @@ function bash-append {
 	echo $1 >> ~/.bashrc
 	bash-src
 }
+function clean-history-command {
+	# Example of line from history Output:
+	# 1309  01/06/18 12:46:07 bash-src
+
+	# strip line number
+	res=$(echo "$res" | sed -r 's/[0-9]+\s+//')
+	# strip date
+	res=$(echo "$res" | sed -r 's/[0-9]+\/[0-9]+\/[0-9]+\s+//')
+	# strip time
+	res=$(echo "$res" | sed -r 's/[0-9]+:[0-9]+:[0-9]+\s+//')
+	echo "$res"
+}
 function bash-alias {
-	# get second to last item from history (last one will be this func call),
-	# strip the command number, escape any single quotes in the string
-	res=$(history | tail -n2 | head -n1 | sed -r 's/[0-9]+\s+//' | sed "s/\\\"/\\\\\"/g")
+	# get second to last item from history (last one will be this func call)
+	res=$(history | tail -n2 | head -n1)
+	# remove prefixes so we are left with just the command
+	res=$(clean-history-command $res)
 
 	# glue it to the alias, and append it to this file
-	echo "alias $1=\"$res\"" >> ~/.bashrc
+	echo "$res"
+	#echo "alias $1=\"$res\"" >> ~/.bashrc
+	bash-append "alias $1=\"$res\""
 
 	bash-src
+}
+function bash-function {
+	res=$(history | tail -n10 | head -n9)
+	lines=()
+	for i in ${!res[*]}; do
+		#echo $(res | 
+		lines+=("${res[i]}")
+	done
+	echo "$res"
 }
 
 
@@ -313,8 +337,6 @@ find-and-replace () {
     eval "$cmd_str"
 }
 
-alias bash-edit="vim ~/.bashrc"
-alias bash-src="source ~/.bashrc"
 bash-append () {
 	if [ "$1" == "" ]; then
 		echo "Won't append empty line."
@@ -327,17 +349,18 @@ bash-append () {
 
 # Warn if trying to run Remote commands from Local
 alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
-alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
+#alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
-# Quickly ssh into servers. Depends on updates to .ssh/config
-alias ssh-log1="ssh -t log-qa 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
-alias ssh-log2="ssh -t log-qa 'sudo lxc exec team-dev-logistics-2 -- bash; exec $SHELL'"
-alias ssh-cron5="ssh -t log-cron-56 'echo \"Logged into logistics php56 cron server. Access cron with.. (sudo crontab -e)\"; exec $SHELL'"
-alias ssh-cron7="ssh -t log-cron-7 'echo \"Logged into logistics php7 cron server. Access cron with.. (sudo crontab -u logistics -e)\"; exec $SHELL'"
-alias disable-bracket-paste='printf "\e[?2004l"'
-alias uu="sudo apt-get update && sudo apt-get upgrade"
+# SSH CONFIG STUFF
+alias ssh-log1="ssh -t qa-log 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
+alias ssh-log2="ssh -t qa-log 'sudo lxc exec team-dev-logistics-2 -- bash; exec $SHELL'"
+alias ssh-cron7="ssh -t prod-cron 'echo \"Logged into logistics php7 cron server. Access cron with.. (sudo crontab -u logistics -e)\"; exec $SHELL'"
 
 # set enable-bracketed-paste Off
+alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
+
 export HISTTIMEFORMAT="%d/%m/%y %T "
+
+# source a scripts folder
 export PATH="~/.scripts:${PATH}"
