@@ -180,17 +180,39 @@ bash-append () {
     echo $1 >> ~/.profile
     bash-src
 }
+function clean-history-command {
+	# Example of line from history Output:
+	# 1309  01/06/18 12:46:07 bash-src
+
+	# strip line number
+	res=$(echo "$res" | sed -r 's/[0-9]+\s+//')
+	# strip date
+	res=$(echo "$res" | sed -r 's/[0-9]+\/[0-9]+\/[0-9]+\s+//')
+	# strip time
+	res=$(echo "$res" | sed -r 's/[0-9]+:[0-9]+:[0-9]+\s+//')
+	echo "$res"
+}
 function bash-alias {
-	# get second to last item from history (last one will be this func call),
-	# strip the command number, escape any single quotes in the string
-	res=$(history | tail -n2 | head -n1 | sed -r 's/[0-9]+\s+//' | sed "s/\\\"/\\\\\"/g")
+	# get second to last item from history (last one will be this func call)
+	res=$(history | tail -n2 | head -n1)
+	# remove prefixes so we are left with just the command
+	res=$(clean-history-command $res)
 
 	# glue it to the alias, and append it to this file
-	echo "alias $1=\"$res\"" >> ~/.profile
+	echo "$res"
+	#echo "alias $1=\"$res\"" >> ~/.bashrc
+	bash-append "alias $1=\"$res\""
 
 	bash-src
 }
-
+function bash-function {
+	res=$(history | tail -n10 | head -n9)
+	lines=()
+	for i in ${!res[*]}; do
+		lines+=("${res[i]}")
+	done
+	echo "$res"
+}
 
 # Warn if trying to run Remote commands from Local
 alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
