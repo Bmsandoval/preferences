@@ -1,3 +1,4 @@
+#@IgnoreInspection BashAddShebang
 alias serve='php artisan serve --port=8089'
 
 function pslisten {
@@ -185,25 +186,46 @@ function clean-history-command {
 	# 1309  01/06/18 12:46:07 bash-src
 
 	# strip line number
-	res=$(echo "$res" | sed -r 's/[0-9]+\s+//')
+	res=$(echo ${1} | sed -r 's/[0-9]+\s+//')
 	# strip date
-	res=$(echo "$res" | sed -r 's/[0-9]+\/[0-9]+\/[0-9]+\s+//')
+	res=$(echo ${res} | sed -r 's/[0-9]+\/[0-9]+\/[0-9]+\s+//')
 	# strip time
-	res=$(echo "$res" | sed -r 's/[0-9]+:[0-9]+:[0-9]+\s+//')
-	echo "$res"
+	res=$(echo ${res} | sed -r 's/[0-9]+:[0-9]+:[0-9]+\s+//')
+	echo "${res}"
+}
+function _bash-get-clean-history {
+	# if no arguments given, will return your last command
+	_tail=2; _head=1;
+
+    if [ ! -z $1 ]; then
+		_tail=$1
+		# if only one arg given, will return last n-1 commands (not including the current one)
+        if [ -z $2 ]; then _head="$(($_tail-1))"; fi
+	fi
+	# if second arg given, allows selection of a range of history lines
+    if [ ! -z $2 ]; then _head=$2; fi
+
+	res=$(history | tail -n${_tail} | head -n${_head})
+	# remove prefixes so we are left with just the command
+	for i in ${!res[*]}; do
+		echo ${res[$i]}
+		echo "test"
+    	echo $(clean-history-command ${res[$i]})
+	done
+
+	for i in ${!res[*]}; do
+		echo "${res[i]}"
+	done
+
 }
 function bash-alias {
-	# get second to last item from history (last one will be this func call)
-	res=$(history | tail -n2 | head -n1)
-	# remove prefixes so we are left with just the command
-	res=$(clean-history-command $res)
 
 	# glue it to the alias, and append it to this file
 	echo "$res"
 	#echo "alias $1=\"$res\"" >> ~/.bashrc
-	bash-append "alias $1=\"$res\""
+	#bash-append "alias $1=\"$res\""
 
-	bash-src
+	#bash-src
 }
 function bash-function {
 	res=$(history | tail -n10 | head -n9)
