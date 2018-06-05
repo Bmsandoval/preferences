@@ -8,41 +8,6 @@ function pslisten {
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
 alias copy_code="~/scripts/copy.sh"
 
-# Func: git-deploy()
-# Desc: pushes a selected branch to another branch
-# Use : $ deploy feature/somefeature someqa/environment
-git-deploy () {
-	#### Verify Inputs 
-	# Break if less than 2 params
-	if [ $# -ne 2 ]; then
-		echo "expected 2 inputs, received $#"
-		return
-	fi
-	# Break if param_1 is an invalid git branch 
-	temp=$(git rev-parse --verify $1)
-	if [[ -z "$temp" ]]; then
-		echo "git branch $1 doesn't exist"
-		return
-	fi
-	# Break if param_2 is an invalid git branch 
-	temp=$(git rev-parse --verify $2)
-	if [[ -z "$temp" ]]; then
-		echo "git branch $2 doesn't exist"
-		return
-	fi
-
-	#### Begin Deployment Commands 
-	echo "Deploying from $1 to $2"
-	#echo "checking out $2"
-	git checkout $2
-	echo "Hard resetting head of $2 to match $1"
-	git reset --hard $1
-	echo "Force updating $2 to head"
-	git push origin $2 --force
-	#echo "Switching branches back to $1"
-	git checkout -
-}
-
 # Cool alias, required for following bash function
 alias git-all-branches="git for-each-ref --format='%(committerdate:iso8601) %(refname)' --sort -committerdate refs/heads/"
 
@@ -82,11 +47,6 @@ git-my-branches () {
     echo -e "${branches[0]}"
 }
 
-git-test () {
-	git-my-branches
-	echo "$my_branches"
-}
-
 git-show-branches () {
 	toremove="refs\/heads\/"
 	my_branches=()
@@ -106,10 +66,13 @@ git-show-branches () {
 		done
 	}
 }
+
 # Func: git-deploy-auto
 # Desc: interactively select a branch and deploy it to another branch 
 # Use : $ git-deploy-auto .... Follow CLI Prompts 
 git-deploy-auto () {
+	tput sc
+	#### Verify Inputs 
 	if [ "$1" == "-h" ]; then
 		echo "Requests a 'TO' and 'FROM' branch, then migrates the code"
 		echo ""
@@ -148,14 +111,30 @@ git-deploy-auto () {
 	echo "Do you want to deploy FROM:$from_branch, TO:$to_branch?"
 	read -p "(Y)es or (N)o: " input
 	echo ""
-	if [[ ! "${input[0],}" == "y" ]]; then
+	if [[ ! "${input[0]}" == "y" ]]; then
 		echo "Cancelling"
 		return
 	fi
 
 	git-deploy $from_branch $to_branch
+
+	# Clear the screen
+	tput rc
+	tput ed
+
+	#### Begin Deployment Commands 
+	echo "git checkout $to_branch"
+	git checkout $to_branch
+	echo "git reset --hard $from_branch"
+	git reset --hard $from_branch
+	echo "git push origin $to_branch --force"
+	git push origin $to_branch --force
+	echo "git checkout -"
+	git checkout -
 }
 
+# search folders recursively looking for files that contain given word.
+#  replaces all occurences in each file with replacement word
 find-and-replace () {
 	if [ "$1" == "-h" ]; then
 		echo "Provide a value to find and a value to replace it with"
@@ -170,6 +149,7 @@ find-and-replace () {
     eval "$cmd_str"
 }
 
+# Append an entire line to the profile and source it
 bash-append () {
 	if [ "$1" == "" ]; then
 		echo "Won't append empty line."
@@ -179,75 +159,103 @@ bash-append () {
     echo $1 >> ~/.profile
     bash-src
 }
+
+# Append line but don't source it
+_bash-tack () {
+    echo $1 >> ~/.profile
+}
+
+# Get a single command that was run
 function clean-history-command {
+	local hist
+	retStr=''
 	# Example of line from history Output:
 	# 1309  01/06/18 12:46:07 bash-src
-	hist=""
-	if [ -z $1 ]; then
+	if [[ "$1" == "" ]]; then
 		# if only one arg given, get last command and parse that instead 
-		hist=$(history | tail -n2 | head -n1)
+		hist="$(history | tail -n2 | head -n1)"
 	else
-		hist="${1}"
+		hist="$(history | tail -n$(($1)) | head -n1)"
 	fi
 
 	# strip line number
-	res=$(echo ${hist} | sed -r 's/[0-9]+\s+//')
+	hist=$(echo ${hist} | sed -r 's/^[0-9]+\s+//')
 	# strip date
-	res=$(echo ${res} | sed -r 's/[0-9]+\/[0-9]+\/[0-9]+\s+//')
+	hist=$(echo ${hist} | sed -r 's/^[0-9]+\/[0-9]+\/[0-9]+\s+//')
 	# strip time
-	res=$(echo ${res} | sed -r 's/[0-9]+:[0-9]+:[0-9]+\s+//')
-	echo "${res}"
-	echo "testing stuff"
+	hist=$(echo ${hist} | sed -r 's/^[0-9]+:[0-9]+:[0-9]+\s+//')
+	retStr=$hist
 }
-function _bash-get-clean-history {
+
+# Get a range of commands that were run
+function bash-range-history-clean {
+	retArr=()
 	# if no arguments given, will return your last command
 	_tail=2; _head=1;
 
-    if [ ! -z $1 ]; then
+	if [ ! -z $1 ]; then
 		_tail=$1
 		# if only one arg given, will return last n-1 commands (not including the current one)
-        if [ -z $2 ]; then _head="$(($_tail-1))"; fi
+		if [ -z $2 ]; then _head="$(($_tail-1))"; fi
 	fi
 	# if second arg given, allows selection of a range of history lines
-    if [ ! -z $2 ]; then _head=$2; fi
+	if [ ! -z $2 ]; then _head=$2; fi
 
-	res=$(history | tail -n${_tail} | head -n${_head})
-	echo "${res}"
-	# remove prefixes so we are left with just the command
-	for i in ${!res[*]}; do
-		echo "${res[$i]}"
-		#echo $(clean-history-command ${res[$i]})
+	for ((v=$(($_tail)); v>$(($_head)); v-=1)); do
+		# get last command run without all the crap on it
+		clean-history-command "${v}"
+		retArr+=("${retStr}")
 	done
-
-	#for i in ${!res[*]}; do
-		#echo "${res[i]}"
-	#done
-
 }
+
+# Create an alias from the last command run
 function bash-alias {
 	# get the command
-	cmd=$(clean-history-command)
+	clean-history-command
+	cmd=$retStr
 
 	# get/set command name
 	name=""
 	if [ ! -z $1 ]; then
 		name=$1
-	else
-		# if no args given, request a name for the alias 
+	else ##### if no args given, request a name for the alias 
 		read -p "Please name your bash alias: " input 
 		name=$input
 	fi
-
+	# escape any double quotes so I can assume surrounding with double quotes
+	cmd="${cmd//\"/\\\"}"
 	# glue it to the alias, and append it to this file
+	# assume double quotes
+	echo "alias $name=\"$cmd\""
 	bash-append "alias $name=\"$cmd\""
 }
+
+# Create a function from the last few commands run
 function bash-function {
-	res=$(history | tail -n10 | head -n9)
-	lines=()
-	for i in ${!res[*]}; do
-		lines+=("${res[i]}")
+	tput sc
+	echo ""
+	bash-range-history-clean 9 1
+	for i in ${!retArr[*]}; do
+		echo "$i : ${retArr[i]}"
 	done
-	echo "$res"
+	read -p "first: " first
+	read -p "last: " last 
+	read -p "name: " name 
+
+	# Update the .profile
+	_bash-tack "$name () {" 
+	for ((v=$(($first)); v<=$(($last)); v+=1)); do
+		_bash-tack "${retArr[v]}"
+		retArr+=("${retStr}")
+	done
+	_bash-tack "}"
+
+	# Reset carriage
+	tput rc
+	tput ed
+
+	echo "Bash function $name() added to your profile"
+	bash-src
 }
 
 # Warn if trying to run Remote commands from Local
