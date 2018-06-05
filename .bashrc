@@ -124,4 +124,8 @@ if [ -x /usr/bin/mint-fortune ]; then
      /usr/bin/mint-fortune
 fi
 
+# set enable-bracketed-paste Off
+alias disable-bracket-paste='printf "\e[?2004l"'
+disable-bracket-paste
+
 source ~/.profile

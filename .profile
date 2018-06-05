@@ -170,8 +170,6 @@ find-and-replace () {
     eval "$cmd_str"
 }
 
-alias bash-src="source ~/.bashrc"
-alias bash-edit="vim ~/.profile"
 bash-append () {
 	if [ "$1" == "" ]; then
 		echo "Won't append empty line."
@@ -184,14 +182,22 @@ bash-append () {
 function clean-history-command {
 	# Example of line from history Output:
 	# 1309  01/06/18 12:46:07 bash-src
+	hist=""
+	if [ -z $1 ]; then
+		# if only one arg given, get last command and parse that instead 
+		hist=$(history | tail -n2 | head -n1)
+	else
+		hist="${1}"
+	fi
 
 	# strip line number
-	res=$(echo ${1} | sed -r 's/[0-9]+\s+//')
+	res=$(echo ${hist} | sed -r 's/[0-9]+\s+//')
 	# strip date
 	res=$(echo ${res} | sed -r 's/[0-9]+\/[0-9]+\/[0-9]+\s+//')
 	# strip time
 	res=$(echo ${res} | sed -r 's/[0-9]+:[0-9]+:[0-9]+\s+//')
 	echo "${res}"
+	echo "testing stuff"
 }
 function _bash-get-clean-history {
 	# if no arguments given, will return your last command
@@ -206,26 +212,34 @@ function _bash-get-clean-history {
     if [ ! -z $2 ]; then _head=$2; fi
 
 	res=$(history | tail -n${_tail} | head -n${_head})
+	echo "${res}"
 	# remove prefixes so we are left with just the command
 	for i in ${!res[*]}; do
-		echo ${res[$i]}
-		echo "test"
-    	echo $(clean-history-command ${res[$i]})
+		echo "${res[$i]}"
+		#echo $(clean-history-command ${res[$i]})
 	done
 
-	for i in ${!res[*]}; do
-		echo "${res[i]}"
-	done
+	#for i in ${!res[*]}; do
+		#echo "${res[i]}"
+	#done
 
 }
 function bash-alias {
+	# get the command
+	cmd=$(clean-history-command)
+
+	# get/set command name
+	name=""
+	if [ ! -z $1 ]; then
+		name=$1
+	else
+		# if no args given, request a name for the alias 
+		read -p "Please name your bash alias: " input 
+		name=$input
+	fi
 
 	# glue it to the alias, and append it to this file
-	echo "$res"
-	#echo "alias $1=\"$res\"" >> ~/.bashrc
-	#bash-append "alias $1=\"$res\""
-
-	#bash-src
+	bash-append "alias $name=\"$cmd\""
 }
 function bash-function {
 	res=$(history | tail -n10 | head -n9)
@@ -241,17 +255,16 @@ alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(
 alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
 # Quickly ssh into servers. Depends on updates to .ssh/config
-alias ssh-log1="ssh -t log-qa 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
-alias ssh-log2="ssh -t log-qa 'sudo lxc exec team-dev-logistics-2 -- bash; exec $SHELL'"
-alias ssh-cron5="ssh -t log-cron-56 'echo \"Logged into logistics php56 cron server. Access cron with.. (sudo crontab -e)\"; exec $SHELL'"
+alias ssh-log1="ssh -t qa-log 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
+alias ssh-log2="ssh -t qa-log 'sudo lxc exec team-dev-logistics-2 -- bash; exec $SHELL'"
 alias ssh-cron7="ssh -t log-cron-7 'echo \"Logged into logistics php7 cron server. Access cron with.. (sudo crontab -u logistics -e)\"; exec $SHELL'"
-alias disable-bracket-paste='printf "\e[?2004l"'
 alias uu="sudo apt-get update && sudo apt-get upgrade"
+alias restart="sudo shutdown -r now"
 
-# set enable-bracketed-paste Off
-disable-bracket-paste
 export HISTTIMEFORMAT="%d/%m/%y %T "
 #if [ -f ~/.scripts ]; then
 #    . ~/.scripts
 #fi
 export PATH="~/.scripts:${PATH}"
+alias bash-src="source ~/.bashrc"
+alias bash-edit="vim ~/.profile"
