@@ -233,7 +233,6 @@ function bash-alias {
 # Create a function from the last few commands run
 function bash-function {
 	tput sc
-	echo ""
 	bash-range-history-clean 9 1
 	for i in ${!retArr[*]}; do
 		echo "$i : ${retArr[i]}"
