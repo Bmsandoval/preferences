@@ -128,4 +128,10 @@ fi
 alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
 
+# Load env variables
+set -a
+source ./.scripts/.env
+set +a
+#export $(egrep -v '^#' ./.scripts/.env | xargs -d '\n')
+
 source ~/.profile
