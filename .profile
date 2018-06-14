@@ -4,6 +4,15 @@ function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
 }
 
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+	tput rc
+	tput ed
+	echo "Command cancelled..."
+}
+
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
 
 # Cool alias, required for following bash function
