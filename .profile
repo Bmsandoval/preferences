@@ -47,6 +47,17 @@ git-branches () {
         fi
     done
 }
+# Use if you want to have a seperate git
+# repo within the same folder structure
+# as another repo.
+# Optionally provide git repo to change to
+git-init (){
+	git init --bare .get
+	git config --unset core.bare
+	if [ "$1" != "" ]; then
+		git remote add origin $1 
+	fi
+}
 
 # Interactively select deployment options
 # Use : $ git-deploy .... Follow CLI Prompts
@@ -243,6 +254,7 @@ alias ssh-log2="ssh -t qa-log 'sudo lxc exec team-dev-logistics-2 -- bash; exec 
 alias ssh-cron7="ssh -t log-cron-7 'echo \"Logged into logistics php7 cron server. Access cron with.. (sudo crontab -u logistics -e)\"; exec $SHELL'"
 alias uu="sudo apt-get update && sudo apt-get upgrade"
 alias restart="sudo shutdown -r now"
+alias shutdown="sudo shutdown now"
 
 export HISTTIMEFORMAT="%d/%m/%y %T "
 #if [ -f ~/.scripts ]; then
