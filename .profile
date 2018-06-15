@@ -33,7 +33,7 @@ git-branches () {
         branch="${line/$toRemove/$toReplace}"
         IFS=',' read -r -a b_array <<< "$branch"
         if [[ ! " ${COMMON_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
-            if [[ ! " ${QA_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
+            if [[ ! " ${DEPLOYABLE_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
                 edit_time=$(echo ${b_array[0]} | sed -r 's/\s+[-+]?[0-9]+\s+?$//')
                 edit_times+=("$edit_time")
                 branches+=("${b_array[1]}")
@@ -95,7 +95,7 @@ git-deploy () {
     else
         tput sc
         echo "------ QA Branches ------"
-        for branch in "${QA_BRANCHES[@]}";
+        for branch in "${DEPLOYABLE_BRANCHES[@]}";
         do
             echo "$branch"
         done
@@ -106,7 +106,7 @@ git-deploy () {
         tput ed
     fi
 	# Verify the to_branch
-	if [[ ! " ${QA_BRANCHES[@]} " =~ "$to_branch" ]]; then
+	if [[ ! " ${DEPLOYABLE_BRANCHES[@]} " =~ "$to_branch" ]]; then
 		echo "Not a valid branch or cannot deploy TO here"
 		return
 	fi

@@ -132,6 +132,14 @@ fi
 alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
 
+if [ ! -f ~/.scripts/.env ]; then
+	if [ -f ~/.scripts/.env.ex ]; then
+		cp ~/.scripts/.env.ex ~/.scripts/.env
+	else
+		touch ~/.scripts/.env
+	fi
+fi
+
 # Load env variables
 set -a
 source ~/.scripts/.env
