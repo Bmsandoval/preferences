@@ -52,7 +52,7 @@ git-branches () {
 # as another repo.
 # Optionally provide git repo to change to
 git-init (){
-	git init --bare .get
+	git init --bare .git
 	git config --unset core.bare
 	if [ "$1" != "" ]; then
 		git remote add origin $1 
