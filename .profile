@@ -245,8 +245,8 @@ bash-function () {
 }
 
 # Warn if trying to run Remote commands from Local
-alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
-alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
+#alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
+#alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
 # Quickly ssh into servers. Depends on updates to .ssh/config
 alias ssh-log1="ssh -t qa-log 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
