@@ -52,7 +52,7 @@ git-branches () {
 # as another repo.
 # Optionally provide git repo to change to
 git-init (){
-	git init --bare .get
+	git init --bare .git
 	git config --unset core.bare
 	if [ "$1" != "" ]; then
 		git remote add origin $1 
@@ -245,14 +245,14 @@ bash-function () {
 }
 
 # Warn if trying to run Remote commands from Local
-alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
-alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
+#alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
+#alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
 # Quickly ssh into servers. Depends on updates to .ssh/config
 alias ssh-log1="ssh -t qa-log 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
 alias ssh-log2="ssh -t qa-log 'sudo lxc exec team-dev-logistics-2 -- bash; exec $SHELL'"
 alias ssh-cron7="ssh -t log-cron-7 'echo \"Logged into logistics php7 cron server. Access cron with.. (sudo crontab -u logistics -e)\"; exec $SHELL'"
-alias uu="sudo apt-get update && sudo apt-get upgrade"
+alias uu="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y"
 alias restart="sudo shutdown -r now"
 alias shutdown="sudo shutdown now"
 
@@ -260,6 +260,7 @@ export HISTTIMEFORMAT="%d/%m/%y %T "
 #if [ -f ~/.scripts ]; then
 #    . ~/.scripts
 #fi
-export PATH="~/.scripts:${PATH}"
+export PATH="/home/sandman/.scripts:${PATH}"
 alias bash-src="source ~/.bashrc"
 alias bash-edit="vim ~/.profile"
+alias ssh-edit="vim ~/.ssh/config"
