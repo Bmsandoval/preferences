@@ -244,6 +244,22 @@ bash-function () {
     echo "Bash function $name() added to your profile"
 }
 
+apt-install () {
+	install_file=~/.scripts/.install_programs
+	if [ "$1" == "" ]; then
+		# if no arg given, install all
+		xargs -a <(awk '! /^ *(#|$)/' $install_file) -r -- sudo apt-get install -y
+	else
+		val=$(grep -x "^$1" $install_file)
+		if [ "$1" == "" ]; then
+			# if it's not in the file, add it
+			echo "$1" >> $install_file
+		fi
+		
+		sudo apt install $1
+	fi
+} 
+
 # Warn if trying to run Remote commands from Local
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"

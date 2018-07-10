@@ -5,6 +5,6 @@
 !.profile
 !.bashrc
 !.vimrc
-!.tmux
+!.tmux.conf
 !/.scripts/
 /.scripts/.env
