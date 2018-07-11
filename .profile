@@ -275,6 +275,8 @@ apt-install () {
 	fi
 } 
 
+tmux-split-cmd () ( tmux split-window -dh -t $TMUX_PANE "bash --rcfile <(echo '. ~/.bashrc;$*')" )
+
 # Warn if trying to run Remote commands from Local
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
@@ -297,5 +299,6 @@ alias bash-edit="vim ~/.profile"
 alias ssh-edit="vim ~/.ssh/config"
 alias tmux-edit="vim ~/.tmux.conf"
 alias users-list="cut -d: -f1 /etc/passwd"
+
 
 
