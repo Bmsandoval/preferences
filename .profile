@@ -1,17 +1,32 @@
 #@IgnoreInspection BashAddShebang
+source ~/.bashrc
+
 alias serve='php artisan serve --port=8089'
 function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
 }
 
-# trap ctrl-c and call ctrl_c()
+## trap ctrl-c to gracefully handle text ui
 trap ctrl_c INT
-
 function ctrl_c() {
 	tput rc
 	tput ed
 	echo "Command cancelled..."
 }
+
+
+## create an env file if it doesn't exist
+if [ ! -f ~/.scripts/.env ]; then
+	if [ -f ~/.scripts/.env.ex ]; then
+		cp ~/.scripts/.env.ex ~/.scripts/.env
+	else
+		touch ~/.scripts/.env
+	fi
+fi
+# parse env file. will fail if doesn't exist
+set -a
+source ~/.scripts/.env
+set +a
 
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
 
@@ -277,6 +292,9 @@ export HISTTIMEFORMAT="%d/%m/%y %T "
 #    . ~/.scripts
 #fi
 export PATH="/home/sandman/.scripts:${PATH}"
-alias bash-src="source ~/.bashrc"
+alias bash-src="source ~/.profile"
 alias bash-edit="vim ~/.profile"
 alias ssh-edit="vim ~/.ssh/config"
+alias users-list="cut -d: -f1 /etc/passwd"
+
+

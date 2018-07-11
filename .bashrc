@@ -2,6 +2,9 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+## IMPORTANT ##
+# Note: don't export paths in the bashrc
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -131,19 +134,3 @@ fi
 # set enable-bracketed-paste Off
 alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
-
-if [ ! -f ~/.scripts/.env ]; then
-	if [ -f ~/.scripts/.env.ex ]; then
-		cp ~/.scripts/.env.ex ~/.scripts/.env
-	else
-		touch ~/.scripts/.env
-	fi
-fi
-
-# Load env variables
-set -a
-source ~/.scripts/.env
-set +a
-#export $(egrep -v '^#' ./.scripts/.env | xargs -d '\n')
-
-source ~/.profile
