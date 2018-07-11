@@ -295,6 +295,7 @@ export PATH="/home/sandman/.scripts:${PATH}"
 alias bash-src="source ~/.profile"
 alias bash-edit="vim ~/.profile"
 alias ssh-edit="vim ~/.ssh/config"
+alias tmux-edit="vim ~/.tmux.conf"
 alias users-list="cut -d: -f1 /etc/passwd"
 
 
