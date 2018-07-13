@@ -302,3 +302,4 @@ alias users-list="cut -d: -f1 /etc/passwd"
 
 
 
+alias list-specs="inxi -Fz"
