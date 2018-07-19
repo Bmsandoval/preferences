@@ -321,6 +321,12 @@ alias bash-edit="vim ~/.profile"
 alias ssh-edit="vim ~/.ssh/config"
 alias tmux-edit="vim ~/.tmux.conf"
 alias users-list="cut -d: -f1 /etc/passwd"
+alias fix-wifi="echo 'options rtl8188ee swenc=Y ips=N' | sudo tee /etc/modprobe.d/rtl8188ee.conf"
 
 
 
+alias list-specs="inxi -Fz"
+
+## Programs to run on boot
+# initialize the iperf server so I can test network speeds against it
+screen -S iperf -d -m iperf -s
