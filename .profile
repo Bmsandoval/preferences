@@ -329,8 +329,8 @@ alias list-specs="inxi -Fz"
 
 ## Programs to run on boot
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 bind -x '"\C-p": vim $(fzf);'
+alias fuz="fzf"
 
 # initialize the iperf server so I can test network speeds against it
 screen -S iperf -d -m iperf -s
