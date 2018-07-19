@@ -134,3 +134,5 @@ fi
 # set enable-bracketed-paste Off
 alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
+
+#[ -f ~/.fzf.bash ] && source ~/.fzf.bash

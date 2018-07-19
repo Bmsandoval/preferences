@@ -278,10 +278,10 @@ apt-install () {
 tmux-split-cmd () ( tmux split-window -dh -t $TMUX_PANE "bash --rcfile <(echo '. ~/.bashrc;$*')" )
 
 net-hosts-list () {
-	grep -w -i "HostName" ~/.ssh/config | sed 's/[\t]*Hostname //'
+	grep -w -i "HostName" ~/.ssh/config | sed 's/[\t ]*Hostname //'
 }
 _net-hosts-list () {
-	HOSTS=$(grep -w -i "HostName" ~/.ssh/config | sed 's/[\t]*Hostname //')
+	HOSTS=$(grep -w -i "HostName" ~/.ssh/config | sed 's/[\t ]*Hostname //')
 }
 
 net-test-hosts () {
@@ -289,7 +289,7 @@ net-test-hosts () {
 	fping ${HOSTS[@]}
 }
 net-test-external () {
-	fping www.google.com www.github.com www.amazon.com
+	fping www.google.com www.github.com www.amazon.com www.slack.com
 }
 
 _net-test-speed () {
@@ -328,5 +328,6 @@ alias fix-wifi="echo 'options rtl8188ee swenc=Y ips=N' | sudo tee /etc/modprobe.
 alias list-specs="inxi -Fz"
 
 ## Programs to run on boot
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 # initialize the iperf server so I can test network speeds against it
 screen -S iperf -d -m iperf -s
