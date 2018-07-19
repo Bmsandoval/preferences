@@ -6,5 +6,5 @@
 !.bashrc
 !.vimrc
 !.tmux.conf
-!/.scripts/
-/.scripts/.env
+!/.scripts
+!/.scripts/.env

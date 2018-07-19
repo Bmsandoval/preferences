@@ -277,6 +277,28 @@ apt-install () {
 
 tmux-split-cmd () ( tmux split-window -dh -t $TMUX_PANE "bash --rcfile <(echo '. ~/.bashrc;$*')" )
 
+net-hosts-list () {
+	grep -w -i "HostName" ~/.ssh/config | sed 's/[\t]*Hostname //'
+}
+_net-hosts-list () {
+	HOSTS=$(grep -w -i "HostName" ~/.ssh/config | sed 's/[\t]*Hostname //')
+}
+
+net-test-hosts () {
+	_net-hosts-list
+	fping ${HOSTS[@]}
+}
+net-test-external () {
+	fping www.google.com www.github.com www.amazon.com
+}
+
+_net-test-speed () {
+	screen -dmS speedtest bash -c 'speedtest-cli | tee .scripts/results/speedtest' ignoreme_arg
+}
+_net-test-speed-results () {
+	sh -c 'tail -n +0 -f .scripts/results/speedtest | { sed "/Upload: / q" && kill $$ ;}'
+}
+
 # Warn if trying to run Remote commands from Local
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
