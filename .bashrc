@@ -115,6 +115,7 @@ alias l='ls -CF'
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
+#. ~/.profile
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -135,4 +136,44 @@ fi
 alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
 
-#[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+# fzf
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# autojump
+. /usr/share/autojump/autojump.bash
+# favorites
+# ------------------
+unalias cdg 2> /dev/null
+cdg() {
+   
+   local dest_dir=$(cdscuts_glob_echo | fzf )
+   if [[ $dest_dir != '' ]]; then
+      cd "$dest_dir"
+   fi
+}
+export -f cdg > /dev/null
+# favorite NOTES
+# ------------------
+unalias cdn 2> /dev/null
+cdn() {
+   
+   local dest_dir=$(find ~/.notes | fzf )
+   if [[ $dest_dir != '' ]]; then
+      cd "$dest_dir"
+   fi
+}
+export -f cdn > /dev/null
+# integrate fzf with autojump
+j() {
+    if [[ "$#" -ne 0 ]]; then
+        cd $(autojump $@)
+        return
+    fi
+    local dest_dir= $(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+   if [[ $dest_dir != '' ]]; then
+      cd "$dest_dir"
+   fi
+}
+
+# Run twolfson/sexy-bash-prompt
+. ~/.bash_prompt

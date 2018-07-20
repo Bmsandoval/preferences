@@ -8,4 +8,6 @@
 !.tmux.conf
 !/.scripts
 !/.scripts/.env
+!/.notes
 !/applications
+!.bash_prompt
