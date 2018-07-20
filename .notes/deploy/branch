@@ -1,0 +1,21 @@
+## from github.com
+Make a new pull request
+base master from dev
+verify the pull request, fix merge conflicts as needed
+hit the merge button
+delete the branch
+watch for pipeline to reach approval stage
+inform approver, give them the PR(s) assosciated
+wait again for pipeline to finish
+ssh into box and run the migrations one step at a time
+
+# Recommended: save deployment branches in separate directory
+pull master
+pull dev
+merge dev into master
+fix conflicts if they exist
+push to master
+inform project owner that the build is awaiting approval
+> should tell them the PRs
+run migrations (step one at a time to avoid migration issues)
+note in the release channel the PR that 

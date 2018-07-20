@@ -54,32 +54,4 @@ source ~/.bashrc
 #./install
 #cd ~
 
-###https://medium.com/adorableio/simple-note-taking-with-fzf-and-vim-2a647a39cfa
-# great notes system with fzf integration
-mkdir ~/.notes
-sudo cat <<EOT >> /usr/bin/fuz
-#!/usr/bin/env bash
-set -e
-main() {
-  previous_file="$1"
-  target=`select_file $previous_file`
-
-   if [[ $target != '' ]]; then
-      if [[ -f $target ]]; then
-         vim "$target"
-         main "$target"
-      elif [[ -n $target ]]; then
-         cd $target
-         #main "$target"
-      fi
-   fi
-}
-select_file() {
-  given_file="$1"
-  find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap --query="$given_file"
-}
-main ""
-EOT
-sudo chmod a+x /usr/bin/fuz
-
 

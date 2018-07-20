@@ -332,10 +332,21 @@ alias list-specs="inxi -Fz"
 bind -x '"\C-p": vim $(fzf);'
 bind -x '"\C-g": git log --pretty=oneline --abbrev-commit | fzf --preview "echo {} | cut -f 1 -d \" \" | xargs git show --color=always"'
 bind -x '"\C-f": cdg | fzf'
-#alias cdn="find ~/.notes | fzf --preview=\"if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi\" --preview-window=right:70%:wrap"
-bind -x '"\C-n": cdn'
+n-f () {
+  target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap)
+  if [[ $target != '' ]]; then
+    if [[ -f $target ]]; then
+      vim "$target"
+    elif [[ -n $target ]]; then
+      cd "$target"
+    fi
+    n-f
+  fi
+}
+
+
+#bind -x '"\C-n": cdn'
 alias f="fzf"
-alias n=". fuz"
 # file previews
 export FZF_CTRL_T_OPTS="--preview 'cat {} | head -200'"
 #export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
