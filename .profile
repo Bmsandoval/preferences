@@ -401,6 +401,15 @@ cf() {
      fi
   fi
 }
+bm() {
+	local bookmarks=~/.cdg_paths
+	local book=$(grep -x "^$PWD" $bookmarks)
+	if [ "$book" == "" ]; then
+		# if it's not in the file, add it
+		echo "$PWD" >> $bookmarks
+	fi
+}
+   
 # cdf - cd into the directory of the selected file
 cdf() {
    local file
