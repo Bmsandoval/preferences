@@ -152,17 +152,23 @@ cdg() {
    fi
 }
 export -f cdg > /dev/null
-# favorite NOTES
+
+# NOTES
 # ------------------
-unalias cdn 2> /dev/null
-cdn() {
-   
-   local dest_dir=$(find ~/.notes | fzf )
-   if [[ $dest_dir != '' ]]; then
-      cd "$dest_dir"
+unalias nts 2> /dev/null
+nts() {
+   target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap)
+   if [[ $target != '' ]]; then
+      if [[ -f $target ]]; then
+         vim "$target"
+      #elif [[ -n $target ]]; then
+      else
+         cd "$target"
+      fi
    fi
 }
-export -f cdn > /dev/null
+export -f nts > /dev/null
+
 # integrate fzf with autojump
 j() {
     if [[ "$#" -ne 0 ]]; then

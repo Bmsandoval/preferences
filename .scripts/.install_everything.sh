@@ -1,7 +1,8 @@
 apt-install
 
 # required for autojump to work
-echo ". /usr/share/autojump/autojump.bash" >> ~/.bashrc
+## but should already be in bashrc
+#echo ". /usr/share/autojump/autojump.bash" >> ~/.bashrc
 
 ###### https://dmitryfrank.com/articles/shell_shortcuts
 ## start setting up bookmarks
@@ -36,8 +37,8 @@ sudo chmod a+x /usr/bin/cdscuts_glob_echo
 #      cd "$dest_dir"
 #   fi
 #}
-export -f cdg > /dev/null
-EOT
+#export -f cdg > /dev/null
+#EOT
 ## done setting up bookmarks
 
 # install sexy_bash_prompt
@@ -46,9 +47,39 @@ cd sexy-bash-prompt
 make install
 source ~/.bashrc
 
-# install fzf
-cd applications
-git clone git@github.com:junegunn/fzf.git
-cd fzf
-./install
-cd ~
+## install fzf
+#cd applications
+#git clone git@github.com:junegunn/fzf.git
+#cd fzf
+#./install
+#cd ~
+
+###https://medium.com/adorableio/simple-note-taking-with-fzf-and-vim-2a647a39cfa
+# great notes system with fzf integration
+mkdir ~/.notes
+sudo cat <<EOT >> /usr/bin/fuz
+#!/usr/bin/env bash
+set -e
+main() {
+  previous_file="$1"
+  target=`select_file $previous_file`
+
+   if [[ $target != '' ]]; then
+      if [[ -f $target ]]; then
+         vim "$target"
+         main "$target"
+      elif [[ -n $target ]]; then
+         cd $target
+         #main "$target"
+      fi
+   fi
+}
+select_file() {
+  given_file="$1"
+  find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap --query="$given_file"
+}
+main ""
+EOT
+sudo chmod a+x /usr/bin/fuz
+
+
