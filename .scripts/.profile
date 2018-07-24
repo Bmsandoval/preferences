@@ -339,11 +339,11 @@ alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^
 
 alias note-find="nf"
 nf () {
-  target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap --reverse)
+  target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
   if [[ $target != '' ]]; then
     if [[ -f $target ]]; then
       vim "$target"
-      n
+      nf
     elif [[ -n $target ]]; then
       cd "$target"
     fi
@@ -353,7 +353,7 @@ nf () {
 alias note-new="nn"
 nn () {
   note=$(vim)
-  locates=$(find ~/.notes -type d | fzf --preview="tree -C {}" --preview-window=right:70%:wrap --multi --reverse)
+  locates=$(find ~/.notes -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
 }
 
 
@@ -363,27 +363,27 @@ alias f="fzf"
 export FZF_CTRL_T_OPTS="--preview 'cat {} | head -200'"
 #export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
 # select the command if it's the last one
-export FZF_CTRL_T_OPTS="--select-1 --exit-0"
+export FZF_CTRL_T_OPTS="--select-1 --exit-0 --reverse"
 
 # ctrl+r sort by default
 # if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap --reverse
 
 #hist=$(echo ${hist} | sed -r 's/^[0-9]+\s+//')
 
-export FZF_CTRL_R_OPTS='--preview="val=\$(cut -d\" \" -f3 <<< \"{}\"); cat ~/.bash_history | sed /^#/d | sed -n \$((val-10)),\$((val+10))p" --sort --reverse'
+export FZF_CTRL_R_OPTS='--preview="val=\$(cut -d\" \" -f3 <<< \"{}\"); cat ~/.bash_history | sed /^#/d | sed -n \$((\$val-10)),\$((\$val+10))p" --sort --reverse'
 
 # Avoid duplicates
 #export HISTCONTROL=ignoredups:erasedups  
 # When the shell exits, append to the history file instead of overwriting it
-shopt -s histappend
+#shopt -s histappend
 # After each command, append to the history file and reread it
-export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r"
+#export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r"
 #
 
 # directory previews
 export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
 # full screen searches
-export FZF_DEFAULT_OPTS='--height=60% --no-reverse'
+export FZF_DEFAULT_OPTS='--height=60% --reverse'
 
 # initialize the iperf server so I can test network speeds against it
 #screen -S iperf -d -m iperf -s
@@ -397,23 +397,13 @@ export FZF_DEFAULT_OPTS='--height=60% --no-reverse'
 
 
 #### EXAMPLES
-### https://github.com/junegunn/fzf/wiki/examples
-# fe [FUZZY PATTERN] - Open the selected file with the default editor
-#   - Bypass fuzzy finder if there's only one match (--select-1)
-#   - Exit if there's no match (--exit-0)
-fe() {
-  local files
-  IFS=$'\n' files=($(fzf-tmux --query="$1" --multi --select-1 --exit-0))
-  [[ -n "$files" ]] && ${EDITOR:-vim} "${files[@]}"
-}
-
 # vf - fuzzy open with vim from anywhere
 # ex: vf word1 word2 ... (even part of a file name)
 # zsh autoload function
 vf() {
   local files
 
-  files=(${(f)"$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 -0 -1 -m)"})
+  files=(${(f)"$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 --reverse -0 -1 -m)"})
 
   if [[ -n $files ]]
   then
@@ -427,7 +417,7 @@ vf() {
 cf() {
   local file
 
-  file="$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 -0 -1)"
+  file="$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf  --reverse --read0 -0 -1)"
 
   if [[ -n $file ]]
   then
@@ -452,7 +442,7 @@ bm() {
 cdf() {
    local file
    local dir
-   file=$(fzf +m -q "$1") && dir=$(dirname "$file") && cd "$dir"
+   file=$(fzf +m -q --reverse "$1") && dir=$(dirname "$file") && cd "$dir"
 }
 
 # fstash - easier way to deal with stashes
@@ -464,7 +454,7 @@ fstash() {
   local out q k sha
   while out=$(
     git stash list --pretty="%C(yellow)%h %>(14)%Cgreen%cr %C(blue)%gs" |
-    fzf --ansi --no-sort --query="$q" --print-query \
+    fzf --ansi --reverse --no-sort --query="$q" --print-query \
         --expect=ctrl-d,ctrl-b);
   do
     mapfile -t out <<< "$out"
