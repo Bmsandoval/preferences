@@ -145,7 +145,6 @@ disable-bracket-paste
 # ------------------
 unalias cdg 2> /dev/null
 cdg() {
-   
    local dest_dir=$(cdscuts_glob_echo | fzf )
    if [[ $dest_dir != '' ]]; then
       cd "$dest_dir"
@@ -153,29 +152,13 @@ cdg() {
 }
 export -f cdg > /dev/null
 
-# NOTES
-# ------------------
-unalias nts 2> /dev/null
-nts() {
-   target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:70%:wrap)
-   if [[ $target != '' ]]; then
-      if [[ -f $target ]]; then
-         vim "$target"
-      #elif [[ -n $target ]]; then
-      else
-         cd "$target"
-      fi
-   fi
-}
-export -f nts > /dev/null
-
 # integrate fzf with autojump
 j() {
     if [[ "$#" -ne 0 ]]; then
         cd $(autojump $@)
         return
     fi
-    local dest_dir= $(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+    local dest_dir=$(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
    if [[ $dest_dir != '' ]]; then
       cd "$dest_dir"
    fi

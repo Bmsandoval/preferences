@@ -322,23 +322,21 @@ alias tmux-edit="vim ~/.tmux.conf"
 alias users-list="cut -d: -f1 /etc/passwd"
 alias fix-wifi="echo 'options rtl8188ee swenc=Y ips=N' | sudo tee /etc/modprobe.d/rtl8188ee.conf"
 
-
-
 alias list-specs="inxi -Fz"
 
 ## Programs to run on boot
 #[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 bind -x '"\C-p": vim $(fzf);'
 bind -x '"\C-g": git log --pretty=oneline --abbrev-commit | fzf --preview "echo {} | cut -f 1 -d \" \" --reverse | xargs git show --color=always"'
-bind -x '"\C-f": cdg | fzf'
+bind -x '"\C-f": cdg'
 ## commonly used command, let's give it a few shortcuts
 ############ TODO : CAN i JUST SOURCE MY .PROFILE IN THE PREVIEW???
-bind -x '"\C-b": find-command'
+#bind -x '"\C-b": find-command'
 alias fc="find-command"
 alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^{}'"
 
-alias note-find="nf"
-nf () {
+alias nf="note-find"
+note-find () {
   target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
   if [[ $target != '' ]]; then
     if [[ -f $target ]]; then
@@ -350,9 +348,8 @@ nf () {
   fi
 }
 
-alias note-new="nn"
-nn () {
-  note=$(vim)
+alias nn="note-new"
+note-new () {
   locates=$(find ~/.notes -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
 }
 

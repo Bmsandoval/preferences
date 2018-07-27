@@ -1,0 +1,8 @@
+From the directory of the bot that you are deploying:
+$ leo-cli publish . --awsprofile prod -e prod
+
+From inside the 'gti' directory (bot collection directory)
+$ leo-cli deploy .
+May need to do ...
+$ leo-cli deploy . --awsprofile prod -e prod
+

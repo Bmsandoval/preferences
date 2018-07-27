@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### Variable Declarations ###
-local_dir=/home/sandman/Work/code
+local_dir=/home/sandman/projects/work/code
 remote_dir=/var/www/code
 remote_ssh=dev
 # List of directories to exclude

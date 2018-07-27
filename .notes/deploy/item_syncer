@@ -1,0 +1,3 @@
+## Working Dir: /var/www/code/api/Console
+(sudo?) ./cake item_sync syncItems -v
+(sudo?) ./cake item_sync syncAutomated dry_run=1,add_missing=1,update_outdated=1,sync_unchanged=1 -v
