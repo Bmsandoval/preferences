@@ -335,6 +335,41 @@ bind -x '"\C-f": cdg'
 alias fc="find-command"
 alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^{}'"
 
+alias fh="find-host"
+find-host () {
+  target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
+  if [[ $target != '' ]]; then
+    if [[ -f $target ]]; then
+      vim "$target"
+      nf
+    elif [[ -n $target ]]; then
+      cd "$target"
+    fi
+  fi
+}
+testytesty () {
+        #edit_time=$(echo ${b_array[0]} | sed -r 's/\s+[-+]?[0-9]+\s+?$//')
+        target=$(fzf < <(cat <(compgen -A function -abck | command grep -i '^ssh-') \
+          <(cat ~/.ssh/config /etc/ssh/ssh_config 2> /dev/null | command grep -i '^host ' | command grep -v '[*?]' | awk '{for (i = 2; i <= NF; i++) print $1 " " $i}')
+         ))
+	#### alias ssh-log1="ssh -t qa-log 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
+	if [[ $target == ssh-* ]]; then
+		"$target"
+	elif [[ $target == host* ]]; then
+		target=$(echo "$target" | sed -r 's/host//')
+		ssh "$target"
+	fi
+}
+_fzf_complete_ssh() {
+  _fzf_complete '+m' "$@" < <(
+    cat <(cat ~/.ssh/config /etc/ssh/ssh_config 2> /dev/null | command grep -i '^host ' | command grep -v '[*?]' | awk '{for (i = 2; i <= NF; i++) print $1 " " $i}') \
+        <(command grep -oE '^[[a-z0-9.,:-]+' ~/.ssh/known_hosts | tr ',' '\n' | tr -d '[' | awk '{ print $1 " " $1 }') \
+        <(command grep -v '^\s*\(#\|$\)' /etc/hosts | command grep -Fv '0.0.0.0') |
+        awk '{if (length($2) > 0) {print $2}}' | sort -u
+  )
+}
+
+
 alias nf="note-find"
 note-find () {
   target=$(find ~/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
