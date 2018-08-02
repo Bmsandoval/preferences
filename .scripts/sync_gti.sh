@@ -5,7 +5,7 @@ local_dir=~/projects/work/gti
 remote_dir=/var/www/gti
 remote_ssh=dev
 # List of directories to exclude
-exclusions=(CodeDeploy CodeBuild .idea .github .gitignore .git */node_modules *.env cake/app/tmp api/tmp */Vendor)
+exclusions=(CodeDeploy CodeBuild .idea .github .gitignore .git */node_modules *.env cake/app/tmp api/tmp */Vendor */vendor)
 # Tack on list I found in GTI
 exclusions+=(.svn .DS_Store .pid .svn .cvsignore log tmp tmp/* public/images/items public/core/configuration.php public/wiki/ .zip .idea daemons/pids daemons/pids/** )
 ### END Declarations ###

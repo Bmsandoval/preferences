@@ -141,16 +141,6 @@ disable-bracket-paste
 
 # autojump
 . /usr/share/autojump/autojump.bash
-# favorites
-# ------------------
-unalias cdg 2> /dev/null
-cdg() {
-   local dest_dir=$(cdscuts_glob_echo | fzf )
-   if [[ $dest_dir != '' ]]; then
-      cd "$dest_dir"
-   fi
-}
-export -f cdg > /dev/null
 
 # integrate fzf with autojump
 j() {
