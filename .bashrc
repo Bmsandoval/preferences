@@ -154,6 +154,10 @@ j() {
    fi
 }
 
+#gk() {
+#	guake -n " " -e "$1" --show
+#}
+
 # Run twolfson/sexy-bash-prompt
 . ~/.bash_prompt
 source ~/.scripts/.profile

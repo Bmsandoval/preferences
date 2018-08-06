@@ -350,7 +350,7 @@ host-ssh () {
 
 alias nf="note-find"
 note-find () {
-  target=$(find /home/sandman/googledrive/linux_shared_files/.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
+  target=$(cd /home/sandman/googledrive/linux_shared_files/; find ./.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
   if [[ $target != '' ]]; then
     if [[ -f $target ]]; then
       vim "$target"
@@ -363,7 +363,7 @@ note-find () {
 
 alias nn="note-new"
 note-new () {
-  locates=$(find /home/sandman/googledrive/linux_shared_files/.notes -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
+  locates=$(cd /home/sandman/googledrive/linux_shared_files/; find ./.notes -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
 }
 
 
@@ -447,6 +447,10 @@ bm() {
 		echo "$PWD" >> $bookmarks
 	fi
 }
+
+gk() {
+	guake -n " " -e "$1" --show
+}
    
 # cdf - cd into the directory of the selected file
 cdf() {
@@ -484,3 +488,4 @@ fstash() {
   done
 }
 alias fix-monitors="cp .config/monitors.xml{.old,}"
+
