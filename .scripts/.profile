@@ -351,6 +351,7 @@ host-ssh () {
 alias nf="note-find"
 note-find () {
   target=$(cd /home/sandman/googledrive/linux_shared_files/; find ./.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
+  target="/home/sandman/googledrive/linux_shared_files/$target"
   if [[ $target != '' ]]; then
     if [[ -f $target ]]; then
       vim "$target"
@@ -488,4 +489,8 @@ fstash() {
   done
 }
 alias fix-monitors="cp .config/monitors.xml{.old,}"
+mkcd() {
+  mkdir "$1"
+  cd "$1"
+}
 
