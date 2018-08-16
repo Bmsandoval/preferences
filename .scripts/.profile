@@ -1,4 +1,5 @@
 #@IgnoreInspection BashAddShebang
+NOTES_LOCATIONS="/home/sandman/googledrive/linux_shared_files/.notes"
 
 alias serve='php artisan serve --port=8089'
 function pslisten {
@@ -351,21 +352,24 @@ host-ssh () {
 
 alias nf="note-find"
 note-find () {
-  target=$(cd /home/sandman/googledrive/linux_shared_files/; find ./.notes | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
-  target="/home/sandman/googledrive/linux_shared_files/$target"
-  if [[ $target != '' ]]; then
-    if [[ -f $target ]]; then
+  target=$(cd $NOTES_LOCATIONS; find . | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
+  if [[ "$target" != '' ]]; then
+    if [[ -f "$target" ]]; then
       vim "$target"
       nf
-    elif [[ -n $target ]]; then
-      cd "$target"
+    elif [[ -n "$target" ]]; then
+      if [[ "$target" != '.' ]]; then
+        cd "$target"
+      else
+        cd "$NOTES_LOCATIONS"
+      fi
     fi
   fi
 }
 
 alias nn="note-new"
 note-new () {
-  locates=$(cd /home/sandman/googledrive/linux_shared_files/; find ./.notes -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
+  locates=$(cd $NOTES_LOCATIONS; find . -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
 }
 
 
