@@ -303,10 +303,6 @@ _net-test-speed-results () {
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
-# Quickly ssh into servers. Depends on updates to .ssh/config
-alias ssh-log1="ssh -t qa-log 'sudo lxc exec team-dev-logistics-1 -- bash; exec $SHELL'"
-alias ssh-log2="ssh -t qa-log 'sudo lxc exec team-dev-logistics-2 -- bash; exec $SHELL'"
-alias ssh-cron7="ssh -t log-cron-7 'echo \"Logged into logistics php7 cron server. Access cron with.. (sudo crontab -u logistics -e)\"; exec $SHELL'"
 alias rdp-shiplinx="screen xfreerdp /u:'GATEWAY\ratelinx' /p:'VJu6CO3ofXbnbZVcnmPh' /v:'ratelinx-rdp.youniqueproducts.com'"
 alias uu="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y"
 alias restart="sudo shutdown -r now"
@@ -346,7 +342,7 @@ host-ssh () {
 		eval $target
 	elif [[ $target == Host* ]]; then
 		target=$(echo "$target" | sed -r 's/Host//I')
-		ssh -t $target
+		eval ssh -t $target
 	fi
 }
 
@@ -499,3 +495,5 @@ mkcd() {
   cd "$1"
 }
 
+# source ssh config extension if it doesn't exist
+[ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
