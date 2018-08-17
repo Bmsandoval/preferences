@@ -350,9 +350,13 @@ alias nf="note-find"
 note-find () {
   target=$(cd $NOTES_LOCATIONS; find . | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
   if [[ "$target" != '' ]]; then
+    target="$NOTES_LOCATIONS/${target:2}"
     if [[ -f "$target" ]]; then
+      #### TODO : search file and show adjacent line numbers in preview. select to go to that line or to the top
+      #search=$(cat -n "$target" | fzf --preview="")
+      #echo "$search"
       vim "$target"
-      nf
+      #nf ### uncomment this to cycle if you are still in the notes
     elif [[ -n "$target" ]]; then
       if [[ "$target" != '.' ]]; then
         cd "$target"
@@ -494,6 +498,7 @@ mkcd() {
   mkdir "$1"
   cd "$1"
 }
+[ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
 
 # source ssh config extension if it doesn't exist
 [ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
