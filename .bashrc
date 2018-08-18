@@ -140,7 +140,7 @@ disable-bracket-paste
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # autojump
-. /usr/share/autojump/autojump.bash
+[ -f /usr/share/autojump/autojump.bash ] && . /usr/share/autojump/autojump.bash
 
 # integrate fzf with autojump
 j() {
