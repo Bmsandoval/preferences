@@ -1,4 +1,4 @@
-#@IgnoreInspection BashAddShebang
+#!/bin/bash
 NOTES_LOCATIONS="/home/sandman/googledrive/linux_shared_files/.notes"
 
 alias serve='php artisan serve --port=8089'
@@ -16,16 +16,16 @@ function ctrl_c() {
 
 
 ## create an env file if it doesn't exist
-if [ ! -f ~/.scripts/.env ]; then
-	if [ -f ~/.scripts/.env.ex ]; then
-		cp ~/.scripts/.env.ex ~/.scripts/.env
+if [ ! -f ~/.scripts/.sh-env ]; then
+	if [ -f ~/.scripts/.sh-env.ex ]; then
+		cp ~/.scripts/.sh-env.ex ~/.scripts/.sh-env
 	else
-		touch ~/.scripts/.env
+		touch ~/.scripts/.sh-env
 	fi
 fi
 # parse env file. will fail if doesn't exist
 set -a
-source ~/.scripts/.env
+source ~/.scripts/.sh-env
 set +a
 
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"

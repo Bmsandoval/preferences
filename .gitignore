@@ -7,7 +7,7 @@
 !.vimrc
 !.tmux.conf
 !/.scripts
-!/.scripts/.env
+!/.scripts/.sh-env
 !/.notes
 !/applications
 !.bash_prompt
