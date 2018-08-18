@@ -502,3 +502,5 @@ mkcd() {
 
 # source ssh config extension if it doesn't exist
 [ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
+
+alias plex="chromium-browser --app=https://plex.tv"
