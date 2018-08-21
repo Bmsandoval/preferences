@@ -303,7 +303,6 @@ _net-test-speed-results () {
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
-alias rdp-shiplinx="screen xfreerdp /u:'GATEWAY\ratelinx' /p:'VJu6CO3ofXbnbZVcnmPh' /v:'ratelinx-rdp.youniqueproducts.com'"
 alias uu="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y"
 alias restart="sudo shutdown -r now"
 alias shutdown="sudo shutdown now"
@@ -335,7 +334,7 @@ alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^
 
 alias hs="host-ssh"
 host-ssh () {
-        target=$(fzf < <(cat <(compgen -A function -abck | command grep -i '^ssh-') \
+        target=$(fzf < <(cat <(compgen -A function -abck | command grep -i '^ssh-') <(compgen -A function -abck | command grep -i '^rdp-') \
           <(cat ~/.ssh/config /etc/ssh/ssh_config 2> /dev/null | command grep -i '^host ' | command grep -v '[*?]' | awk '{for (i = 2; i <= NF; i++) print $1 " " $i}')
          ))
 	if [[ $target == ssh-* ]]; then
@@ -505,3 +504,5 @@ mkcd() {
 [ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
 
 alias plex="chromium-browser --app=https://plex.tv"
+alias outlook="chromium-browser --app=https://outlook.office.com"
+alias messages="chromium-browser --app=https://messages.android.com"
