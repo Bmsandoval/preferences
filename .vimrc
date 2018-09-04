@@ -7,13 +7,13 @@ set smartindent
 set tabstop=4
 set shiftwidth=4
 set smarttab
+set relativenumber
 set number
 set showmatch
 set hlsearch
 set incsearch
 set ignorecase
 set smartcase
-set laststatus=2
 
 " All system-wide defaults are set in $VIMRUNTIME/debian.vim and sourced by
 " the call to :runtime you can find below.  If you wish to change any of those
