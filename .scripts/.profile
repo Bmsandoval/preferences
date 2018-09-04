@@ -46,6 +46,7 @@ git-branches () {
         local toRemove='refs/heads/'
         local toReplace=","
         branch="${line/$toRemove/$toReplace}"
+
         IFS=',' read -r -a b_array <<< "$branch"
         if [[ ! " ${COMMON_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
             if [[ ! " ${DEPLOYABLE_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
@@ -70,61 +71,21 @@ git-init (){
 	git init --bare .git
 	git config --unset core.bare
 	if [ "$1" != "" ]; then
-		git remote add origin $1 
+		git remote add origin $1
 	fi
 }
 
 # Interactively select deployment options
 # Use : $ git-deploy .... Follow CLI Prompts
-git-deploy () {
-	if [ "$1" == "-h" ]; then
-		echo "Requests a 'TO' and 'FROM' branch, then migrates the code"
-		echo ""
-		return
-	fi
-
-    # get the from_branch if not provided
-	if [ "$1" != "" ]; then
-    	from_branch=$1
-	else
-        tput sc
-        echo "------ My Branches ------"
-        git-branches
-		echo "-------------------------"
-        echo "Enter the originating branch "
-        read -p "Deploy FROM: " input
-        from_branch=$input
-        tput rc
-        tput ed
-	fi
-	# Verify the from_branch
-    git-branches -n
-	if [[ ! " ${retArr[@]} " =~ "$from_branch" ]]; then
-		echo "Not a valid branch or cannot deploy FROM here"
-		return
-	fi
-
-	# get the to_branch if not provided
-    if [ "$2" != "" ]; then
-        to_branch=$2
-    else
-        tput sc
-        echo "------ QA Branches ------"
-        for branch in "${DEPLOYABLE_BRANCHES[@]}";
-        do
-            echo "$branch"
-        done
-        echo "-------------------------"
-        read -p "Enter the destination branch: " input
-		to_branch=$input
-        tput rc
-        tput ed
-    fi
-	# Verify the to_branch
-	if [[ ! " ${DEPLOYABLE_BRANCHES[@]} " =~ "$to_branch" ]]; then
-		echo "Not a valid branch or cannot deploy TO here"
-		return
-	fi
+git-deploy() {
+    readarray -t branches < <( git-branches )
+    from_branch=$(echo ${branches} |
+                    fzf  --reverse |
+                    sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
+	echo "${from_branch}"
+    to_branch=$(echo ${branches} |
+                    fzf  --reverse |
+                    sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
 
 	#### Begin Deployment Commands 
 	echo "$ git checkout $to_branch"
@@ -501,7 +462,7 @@ mkcd() {
 
 # source ssh config extension if it doesn't exist
 [ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
-[ -f ~/.scripts/.work.profile ] && source ~/.ssh/.work.profile
+[ -f ~/.scripts/.work.profile ] && source ~/.scripts/.work.profile
 
 alias plex="screen -dm chromium-browser --app=https://plex.tv"
 alias outlook="screen -dm chromium-browser --app=https://outlook.office.com"

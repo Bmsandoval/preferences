@@ -7,14 +7,18 @@ set smartindent
 set tabstop=4
 set shiftwidth=4
 set smarttab
-set relativenumber
-set number
 set showmatch
 set hlsearch
 set incsearch
 set ignorecase
 set smartcase
 
+" remap 'leader' key to ',' instead of '\'
+let mapleader = ","
+" enable hybrid line numbers
+set relativenumber
+set number
+" toggle hybrid and normal line numbers -inconsistent-
 augroup numbertoggle
   autocmd!
   autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
