@@ -493,16 +493,17 @@ fstash() {
     fi
   done
 }
-alias fix-monitors="cp .config/monitors.xml{.old,}"
 mkcd() {
   mkdir "$1"
   cd "$1"
 }
-[ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
+#[ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
 
 # source ssh config extension if it doesn't exist
 [ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
+[ -f ~/.scripts/.work.profile ] && source ~/.ssh/.work.profile
 
-alias plex="chromium-browser --app=https://plex.tv"
-alias outlook="chromium-browser --app=https://outlook.office.com"
-alias messages="chromium-browser --app=https://messages.android.com"
+alias plex="screen -dm chromium-browser --app=https://plex.tv"
+alias outlook="screen -dm chromium-browser --app=https://outlook.office.com"
+alias messages="screen -dm chromium-browser --app=https://messages.android.com"
+alias fix-monitor-layout=". ~/.screenlayout/atwork.sh"

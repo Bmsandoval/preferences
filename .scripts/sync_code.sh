@@ -27,14 +27,6 @@ rsync -r --exclude='CodeDeploy' --exclude='CodeBuild' --exclude='.idea' --exclud
 #sudo clean-up-my-mess
 #EOL
 
-
-
-
-
-#dir=/home/sandman/Work/code
-
-#rsync -a --exclude='CodeDeploy' --exclude='CodeBuild' --exclude='.idea' --exclude='.github' --exclude='.gitignore' --exclude='.git' --exclude '*/node_modules' --exclude='*.env' --exclude='cake/app/tmp' --exclude='api/tmp' --exclude='*/Vendor' $dir/ dev:/var/www/code/ 
-
 #ssh dev 'sudo chmod -R 775 /var/www/code; clean-up-my-mess'
 
 
