@@ -1,23 +1,33 @@
 colorscheme delek
 
+" allow saving a readonly file
 cmap w!! w !sudo tee > /dev/null %
 
+" formatting and stuff
 set autoindent
 set smartindent
 set tabstop=4
 set shiftwidth=4
 set smarttab
-set showmatch
-set hlsearch
+
+" searching in general
 set incsearch
+set showmatch
 set ignorecase
 set smartcase
+" highlighted searches, but give a way to pause the highlights
+set hlsearch
+set paste
+nnoremap <esc> :nohlsearch<return><esc>
+" nnoremap <F2> :set pastetoggle
 
 " remap 'leader' key to ',' instead of '\'
 let mapleader = ","
+
 " enable hybrid line numbers
 set relativenumber
 set number
+
 " toggle hybrid and normal line numbers -inconsistent-
 augroup numbertoggle
   autocmd!
