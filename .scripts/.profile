@@ -48,13 +48,9 @@ git-branches () {
         branch="${line/$toRemove/$toReplace}"
 
         IFS=',' read -r -a b_array <<< "$branch"
-        if [[ ! " ${COMMON_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
-            if [[ ! " ${DEPLOYABLE_BRANCHES[@]} " =~ "${b_array[1]}" ]]; then
-                edit_time=$(echo ${b_array[0]} | sed -r 's/\s+[-+]?[0-9]+\s+?$//')
-                edit_times+=("$edit_time")
-                branches+=("${b_array[1]}")
-            fi
-        fi
+        edit_time=$(echo ${b_array[0]} | sed -r 's/\s+[-+]?[0-9]+\s+?$//')
+        edit_times+=("$edit_time")
+        branches+=("${b_array[1]}")
     done
     for i in ${!branches[*]}; do
         retArr+=("${branches[i]}")
@@ -79,13 +75,14 @@ git-init (){
 # Use : $ git-deploy .... Follow CLI Prompts
 git-deploy() {
     readarray -t branches < <( git-branches )
-    from_branch=$(echo ${branches} |
-                    fzf  --reverse |
-                    sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
-	echo "${from_branch}"
-    to_branch=$(echo ${branches} |
-                    fzf  --reverse |
-                    sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
+
+    from_branch=$(echo ${branches} | fzf  --reverse |
+                sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
+	if [ "$from_branch" == "" ]; then return; fi
+
+    to_branch=$(echo ${branches} | fzf  --reverse |
+                sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
+	if [ "$to_branch" == "" ]; then return; fi
 
 	#### Begin Deployment Commands 
 	echo "$ git checkout $to_branch"
