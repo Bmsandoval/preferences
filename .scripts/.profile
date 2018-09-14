@@ -72,6 +72,7 @@ git-init (){
 }
 
 # Interactively select deployment options
+# Req : fzf
 # Use : $ git-deploy .... Follow CLI Prompts
 git-deploy() {
     readarray -t branches < <( git-branches )
@@ -220,7 +221,7 @@ bash-function () {
 # Given a package list file package.list, try:
 # sudo apt-get install $(awk '{print $1'} package.list)
 apt-install () {
-	install_file=~/.scripts/.install_programs
+	install_file=~/.scripts/packages.list
 	if [ "$1" == "" ]; then
 		# if no arg given, install all
 		xargs -a <(awk '! /^ *(#|$)/' $install_file) -r -- sudo apt-get install -y
@@ -529,5 +530,10 @@ Sudo () {
 . /usr/share/undistract-me/long-running.bash
 notify_when_long_running_commands_finish_install
 
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+alias docker-start-machine='eval $(docker-machine env default)'
 
+docker-hard-reset-containers () {
+	docker-compose down --remove-orphans
+	docker-compose build --no-cache
+	docker-compose up --force-recreate
+}
