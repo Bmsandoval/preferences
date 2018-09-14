@@ -217,6 +217,8 @@ bash-function () {
     echo "Bash function $name() added to your profile"
 }
 
+# Given a package list file package.list, try:
+# sudo apt-get install $(awk '{print $1'} package.list)
 apt-install () {
 	install_file=~/.scripts/.install_programs
 	if [ "$1" == "" ]; then
@@ -464,7 +466,11 @@ mkcd() {
 alias plex="screen -dm chromium-browser --app=https://plex.tv"
 alias outlook="screen -dm chromium-browser --app=https://outlook.office.com"
 alias messages="screen -dm chromium-browser --app=https://messages.android.com"
-alias fix-monitor-layout=". ~/.screenlayout/atwork.sh"
+fix-monitor-layout () {
+	. ~/.screenlayout/prepareWork.sh && \
+	. ~/.screenlayout/setWork.sh && \
+	. ~/.screenlayout/readyForWork.sh
+}
 SLACK_THEME_FILE="/usr/lib/slack/resources/app.asar.unpacked/src/static/ssb-interop.js"
 fix-slack-dark-mode () {
 	cat <<EOT >> "$SLACK_THEME_FILE"
@@ -519,3 +525,9 @@ Sudo () {
 		$(which sudo) "$@"
 	fi
 }
+
+. /usr/share/undistract-me/long-running.bash
+notify_when_long_running_commands_finish_install
+
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
