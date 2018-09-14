@@ -72,6 +72,7 @@ git-init (){
 }
 
 # Interactively select deployment options
+# Req : fzf
 # Use : $ git-deploy .... Follow CLI Prompts
 git-deploy() {
     readarray -t branches < <( git-branches )
@@ -218,7 +219,7 @@ bash-function () {
 }
 
 apt-install () {
-	install_file=~/.scripts/.install_programs
+	install_file=~/.scripts/packages.list
 	if [ "$1" == "" ]; then
 		# if no arg given, install all
 		xargs -a <(awk '! /^ *(#|$)/' $install_file) -r -- sudo apt-get install -y
@@ -519,3 +520,5 @@ Sudo () {
 		$(which sudo) "$@"
 	fi
 }
+
+alias docker-start-machine='eval $(docker-machine env default)'
