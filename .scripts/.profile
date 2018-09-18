@@ -529,11 +529,3 @@ Sudo () {
 
 . /usr/share/undistract-me/long-running.bash
 notify_when_long_running_commands_finish_install
-
-alias docker-start-machine='eval $(docker-machine env default)'
-
-docker-hard-reset-containers () {
-	docker-compose down --remove-orphans
-	docker-compose build --no-cache
-	docker-compose up --force-recreate
-}

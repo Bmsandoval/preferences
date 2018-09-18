@@ -21,10 +21,10 @@ rsync -r --exclude='CodeDeploy' --exclude='CodeBuild' --exclude='.idea' --exclud
 
 # Clean up afterwards
 ssh dev <<EOF
-sudo find ${remote_dir} -type d -exec chmod 0755 {} +
-sudo find ${remote_dir} -type f -exec chmod 0644 {} +
-sudo chown -R ${whoami}:www-data ${remote_dir} 
 cd ${remote_dir}
 sudo chmod +x composer.sh
 sudo ./composer.sh
+sudo find ${remote_dir} -type d -exec chmod 0755 {} +
+sudo find ${remote_dir} -type f -exec chmod 0644 {} +
+sudo chown -R ${whoami}:www-data ${remote_dir} 
 EOF
