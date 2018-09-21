@@ -20,13 +20,11 @@ done
 rsync -r --exclude='CodeDeploy' --exclude='CodeBuild' --exclude='.idea' --exclude='.github' --exclude='.gitignore' --exclude='.git' --exclude '*/node_modules' --exclude='*.env' --exclude='cake/app/tmp' --exclude='api/tmp' --exclude='*/Vendor' $local_dir/ $remote_ssh:$remote_dir 
 
 # Clean up afterwards
-#ssh dev << EOL
-#sudo find ${remote_dir} -type d -exec chmod 0755 {} +
-#sudo find ${remote_dir} -type f -exec chmod 0644 {} +
-#sudo chown -R ${whoami}:www-data ${remote_dir} 
-#sudo clean-up-my-mess
-#EOL
-
-#ssh dev 'sudo chmod -R 775 /var/www/code; clean-up-my-mess'
-
-
+ssh dev <<EOF
+cd ${remote_dir}
+sudo chmod +x composer.sh
+sudo ./composer.sh
+sudo find ${remote_dir} -type d -exec chmod 0755 {} +
+sudo find ${remote_dir} -type f -exec chmod 0644 {} +
+sudo chown -R ${whoami}:www-data ${remote_dir} 
+EOF
