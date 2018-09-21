@@ -521,10 +521,10 @@ Sudo () {
 	fi
 }
 
-alias docker-start-machine='eval $(docker-machine env default)'
+#alias docker-start-machine='eval $(docker-machine env default)'
 
-docker-hard-reset-containers () {
-	docker-compose down --remove-orphans
-	docker-compose build --no-cache
-	docker-compose up --force-recreate
-}
+#docker-hard-reset-containers () {
+#	docker-compose down --remove-orphans
+#	docker-compose build --no-cache
+#	docker-compose up --force-recreate
+#}
