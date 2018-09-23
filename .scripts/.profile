@@ -249,9 +249,14 @@ apt-install () {
 			# if it's not in the file, add it
 			echo "$1" >> $install_file
 		fi
-		
-		sudo apt install -y $1
-		installs=1
+
+		# optimized installation check
+		$(apt-installed "$1")
+		if [ "$?" -eq "0" ]; then
+			# if not installed, install it.
+			sudo apt install -y $1
+			installs=1
+		fi
 	fi
 	if [ "$installs" -eq "0" ]; then
 		echo "nothing to install"
