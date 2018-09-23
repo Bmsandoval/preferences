@@ -218,13 +218,31 @@ bash-function () {
     echo "Bash function $name() added to your profile"
 }
 
+# Given a package name, returns 1 if package is installed
+apt-installed () {
+	if [ "$1" == "" ]; then
+		return 1 # empty? just say installed
+	elif dpkg --get-selections | grep -q "^$1[[:space:]]*install$" >/dev/null; then
+		return 1 # installed
+	else
+		return 0 # not installed
+	fi
+}
+
 # Given a package list file package.list, try:
 # sudo apt-get install $(awk '{print $1'} package.list)
 apt-install () {
 	install_file=~/.scripts/packages.list
+	installs=0
 	if [ "$1" == "" ]; then
-		# if no arg given, install all
-		xargs -a <(awk '! /^ *(#|$)/' $install_file) -r -- sudo apt-get install -y
+		packages=($(awk '! /^ *(#|$)/' $install_file))
+		for pkg in "${packages[@]}"; do
+			$(apt-installed "$pkg")
+			if [ "$?" -eq "0" ]; then
+				sudo apt install -y $pkg
+				installs=1
+			fi
+		done
 	else
 		val=$(grep -x "^$1" $install_file)
 		if [ "$1" == "" ]; then
@@ -232,9 +250,13 @@ apt-install () {
 			echo "$1" >> $install_file
 		fi
 		
-		sudo apt install $1
+		sudo apt install -y $1
+		installs=1
 	fi
-} 
+	if [ "$installs" -eq "0" ]; then
+		echo "nothing to install"
+	fi
+}
 
 tmux-split-cmd () ( tmux split-window -dh -t $TMUX_PANE "bash --rcfile <(echo '. ~/.bashrc;$*')" )
 
@@ -254,10 +276,10 @@ net-test-external () {
 }
 
 _net-test-speed () {
-	screen -dmS speedtest bash -c 'speedtest-cli | tee .scripts/results/speedtest' ignoreme_arg
+	screen -dmS speedtest bash -c 'speedtest-cli | tee ~/.scripts/results/speedtest' ignoreme_arg
 }
 _net-test-speed-results () {
-	sh -c 'tail -n +0 -f .scripts/results/speedtest | { sed "/Upload: / q" && kill $$ ;}'
+	sh -c 'tail -n +0 -f ~/.scripts/results/speedtest | { sed "/Upload: / q" && kill $$ ;}'
 }
 
 # Warn if trying to run Remote commands from Local
@@ -455,7 +477,7 @@ fstash() {
   done
 }
 mkcd() {
-  mkdir "$1"
+  mkdir -p "$1"
   cd "$1"
 }
 #[ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
@@ -536,3 +558,40 @@ Sudo () {
 #}
 . /usr/share/undistract-me/long-running.bash
 notify_when_long_running_commands_finish_install
+
+net-up-loc () {
+	if [[ -z "$1" ]]; then
+		IP=($(/sbin/ip route | awk '/default/ { print $3 }'))
+		echo "testing default host"
+	else
+		IP=$@
+	fi
+	for ip in $IP; do
+		fping -c1 -t300 "$ip" 2>/dev/null 1>/dev/null
+		if [ "$?" = 0 ]
+		then
+		  echo "${ip} is up"
+		else
+		  echo "${ip} is down"
+		fi
+	done
+}
+
+net-up-rem () {
+	if [[ -z "$1" ]]; then
+		sites=($(/sbin/ip route | awk '/default/ { print $3 }'))
+		echo "testing default host"
+	else
+		sites=$@
+	fi
+	for site in $sites; do
+		wget -q --spider http://google.com
+
+		if [ $? -eq 0 ]; then
+			echo "Online"
+		else
+			echo "Offline"
+		fi
+	done
+}
+alias wanip='dig +short myip.opendns.com @resolver1.opendns.com'
