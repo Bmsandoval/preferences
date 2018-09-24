@@ -496,7 +496,9 @@ alias outlook="screen -dm chromium-browser --app=https://outlook.office.com"
 alias messages="screen -dm chromium-browser --app=https://messages.android.com"
 fix-monitor-layout () {
 	. ~/.screenlayout/prepareWork.sh && \
+	sleep 2
 	. ~/.screenlayout/setWork.sh && \
+	sleep 2
 	. ~/.screenlayout/readyForWork.sh
 }
 SLACK_THEME_FILE="/usr/lib/slack/resources/app.asar.unpacked/src/static/ssb-interop.js"
