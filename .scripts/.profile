@@ -602,3 +602,4 @@ net-up-rem () {
 	done
 }
 alias wanip='dig +short myip.opendns.com @resolver1.opendns.com'
+[ -f ~/.scripts/.profile.local ] && source ~/.scripts/.profile.local

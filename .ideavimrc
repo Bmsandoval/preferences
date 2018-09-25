@@ -1,1 +1,2 @@
 source ~/.vimrc
+nmap <leader><leader>s :action KJumpAction <cr>

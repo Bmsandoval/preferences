@@ -73,6 +73,7 @@ Plugin 'dhruvasagar/vim-table-mode'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'tpope/vim-surround'
 Plugin 'scrooloose/nerdtree'
+Plugin 'justinmk/vim-sneak'
 "map <C-n> :NERDTreeToggle<CR>
 nnoremap <Leader>n :NERDTreeToggle<CR>
 " autocmd vimenter * NERDTree
