@@ -542,6 +542,12 @@ document.addEventListener("DOMContentLoaded", function() {
 EOT
 }
 
+fix-mouse-controls () {
+	sudo rmmod psmouse
+	sudo modprobe psmouse
+	xset m default
+}
+
 Sudo () {
 	local firstArg=$1
 	if [ $(type -t $firstArg) == function ]
