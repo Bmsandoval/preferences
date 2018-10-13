@@ -466,28 +466,20 @@ export FZF_DEFAULT_OPTS='--height=60% --reverse'
 # initialize the iperf server so I can test network speeds against it
 #screen -S iperf -d -m iperf -s
 
-
-
-
-
-
-
-
-
 #### EXAMPLES
 # vf - fuzzy open with vim from anywhere
 # ex: vf word1 word2 ... (even part of a file name)
 # zsh autoload function
-vf() {
-  local files
+vf () {
+    local files
 
-  files=(${(f)"$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 --reverse -0 -1 -m)"})
+    files=("$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 --reverse -0 -1 -m)")
 
-  if [[ -n $files ]]
-  then
-     vim -- $files
-     print -l $files[1]
-  fi
+    if [[ -n $files ]]
+    then
+        vim -- $files
+        print -l $files[1]
+    fi
 }
 # cf - fuzzy cd from anywhere
 # ex: cf word1 word2 ... (even part of a file name)
