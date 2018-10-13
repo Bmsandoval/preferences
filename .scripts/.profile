@@ -71,29 +71,61 @@ git-init (){
 	fi
 }
 
+_git-select-branch () {
+	branch=$(git-branches | fzf  --reverse )
+	if [ "${branch}" == "" ]; then return; fi
+	branch=$(echo ${branch} | sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
+	echo "${branch}"
+}
 # Interactively select deployment options
 # Req : fzf
 # Use : $ git-deploy .... Follow CLI Prompts
-git-deploy() {
-    readarray -t branches < <( git-branches )
+yq-deploy-gti() {
+	echo "Deploy From:"
+    from_branch=$(_git-select-branch)
+	if [ "${from_branch}" == "" ]; then return; fi
+	echo "${from_branch}"; echo ""
 
-    from_branch=$(echo ${branches} | fzf  --reverse |
-                sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
-	if [ "$from_branch" == "" ]; then return; fi
-
-    to_branch=$(echo ${branches} | fzf  --reverse |
-                sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
-	if [ "$to_branch" == "" ]; then return; fi
+	echo "Deploy To:"
+	to_branch=$(_git-select-branch)
+	if [ "${to_branch}" == "" ]; then return; fi
+	echo "${to_branch}"; echo ""
 
 	#### Begin Deployment Commands 
-	echo "$ git checkout $to_branch"
+	echo "$ git checkout ${to_branch}"
 	git checkout $to_branch
-	echo "$ git reset --hard $from_branch"
+	echo "$ git reset --hard ${from_branch}"
 	git reset --hard $from_branch
-	echo "$ git push origin $to_branch --force"
+	echo "$ git push origin ${to_branch} --force"
 	git push origin $to_branch --force
 	echo "$ git checkout -"
 	git checkout -
+}
+yq-deploy-code () {
+	echo "Deploy From:"
+	from_branch=$(_git-select-branch)
+	if [ "${from_branch}" == "" ]; then return; fi
+	echo "${from_branch}"; echo ""
+
+    read -p "Deploy To (EX: team-dev-logistics-1) : " to_branch
+    if [ "${to_branch}" == "" ]; then return; fi
+	codebuild -b $from_branch -s $to_branch
+}
+yq-deploy () {
+	# Get base repo name
+    repo=$(basename `git rev-parse --show-toplevel`)
+
+	# Do something if it's a GTI repo
+	if [ "${repo}" == "gti" ]; then
+    	yq-deploy-gti
+	elif [ "${repo}" == "code" ]; then
+		yq-deploy-code
+	elif [ "${repo}" == "logistics" ]; then
+        echo "$ leo-cli publish . --awsprofile dev -e dev"
+        echo "$ leo-cli deploy . GTIOrderImport --awsprofile dev -e dev"
+	elif [ "${repo}" == "API_2.0" ]; then
+		echo "Not yet Enabled"
+    fi
 }
 
 # search folders recursively looking for files that contain given word.
@@ -264,7 +296,40 @@ _net-test-speed-results () {
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
-alias uu="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y"
+uu () {
+	sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
+}
+uu-test () {
+    STATUS_OK=0
+    STATUS_WARNING=1
+    STATUS_CRITICAL=2
+    STATUS_UNKNOWN=3
+
+    # FAILED TO CHECK FOR UPDATES
+    updates=$(/usr/lib/update-notifier/apt-check 2>&1)
+    if [ $? -ne 0 ]; then
+        echo "Querying pending updates failed."
+        exit $STATUS_UNKNOWN
+    fi
+
+	# UPDATE IF THERE ARE ANY
+    if [ "$updates" = "0;0" ]; then
+		echo ">>>>> Nothing To Update <<<<<"
+    else
+		echo ">>>>> Installing Updates <<<<<"
+    	sudo apt-get update -y
+	fi
+
+	# UPGRADE PACKAGES AS NEEDED
+	echo ""
+	echo ">>>>> Upgrading If Needed <<<<<"
+	sudo apt-get upgrade -y
+
+	# REMOVE OLD PACKAGES AS NEEDED
+	echo ""
+	echo ">>>>> Cleaning Up If Needed <<<<<"
+	sudo apt autoremove -y
+}
 alias restart="sudo shutdown -r now"
 alias shutdown="sudo shutdown now"
 
