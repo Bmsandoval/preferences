@@ -2,6 +2,7 @@
 /*
 # White as needed
 !.gitignore
+!.ideavimrc
 !.profile
 !.bashrc
 !.vimrc
