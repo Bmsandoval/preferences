@@ -261,8 +261,8 @@ apt-installed () {
 	fi
 }
 
-# Given a package list file package.list, try:
-# sudo apt-get install $(awk '{print $1'} package.list)
+## Given a package list file package.list, try:
+## sudo apt-get install $(awk '{print $1'} package.list)
 apt-install () {
 	install_file=~/.scripts/packages.list
 	installs=0
@@ -276,23 +276,32 @@ apt-install () {
 			fi
 		done
 	else
-		val=$(grep -x "^$1" $install_file)
-		if [ "$1" == "" ]; then
+    	additions=0
+    	# install as many packages as given
+		for pkg in "$@"; do
+            val=$(grep -x "^$pkg" $install_file)
 			# if it's not in the file, add it
-			echo "$1" >> $install_file
-		fi
+            if [ "$val" == "" ]; then
+                echo "$pkg" >> $install_file
+                echo "Added ${pkg} to ${install_file}"
+				additions=1
+            fi
 
-		# optimized installation check
-		$(apt-installed "$1")
-		if [ "$?" -eq "0" ]; then
+            # optimized installation check
+            $(apt-installed "$pkg")
 			# if not installed, install it.
-			sudo apt install -y $1
-			installs=1
+            if [ "$?" -eq "0" ]; then
+                sudo apt install -y $pkg
+                installs=1
+            fi
+		done
+		if [ "$additions" -eq "1" ]; then
+			echo "" >> $install_file
 		fi
 	fi
-	if [ "$installs" -eq "0" ]; then
-		echo "nothing to install"
-	fi
+    if [ "$installs" -eq "0" ]; then
+        echo "nothing to install"
+    fi
 }
 
 tmux-split-cmd () ( tmux split-window -dh -t $TMUX_PANE "bash --rcfile <(echo '. ~/.bashrc;$*')" )
