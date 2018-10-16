@@ -673,5 +673,10 @@ net-up-rem () {
 		fi
 	done
 }
+
+logs-show-recent () {
+	find . -type f -mmin -60 -exec stat -c $'%Y\t%n' {} + | sort -nr | cut -f2-
+}
+
 alias wanip='dig +short myip.opendns.com @resolver1.opendns.com'
 [ -f ~/.scripts/.profile.local ] && source ~/.scripts/.profile.local
