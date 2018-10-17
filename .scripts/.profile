@@ -111,9 +111,22 @@ yq-deploy-code () {
     if [ "${to_branch}" == "" ]; then return; fi
 	codebuild -b $from_branch -s $to_branch
 }
+
+yq-deploy-api2 () {
+	echo "Deploy From:"
+	from_branch=$(_git-select-branch)
+	if [ "${from_branch}" == "" ]; then return; fi
+	echo "${from_branch}"; echo ""
+
+    read -p "Deploy To (EX: team-dev-logistics-1) : " to_branch
+    if [ "${to_branch}" == "" ]; then return; fi
+    repo=$(basename `git rev-parse --show-toplevel`)
+	codebuild -r $repo -b $from_branch -s $to_branch
+}
 yq-deploy () {
 	# Get base repo name
     repo=$(basename `git rev-parse --show-toplevel`)
+	echo "Deploying for Repo: '${repo}'"
 
 	# Do something if it's a GTI repo
 	if [ "${repo}" == "gti" ]; then
@@ -124,7 +137,10 @@ yq-deploy () {
         echo "$ leo-cli publish . --awsprofile dev -e dev"
         echo "$ leo-cli deploy . GTIOrderImport --awsprofile dev -e dev"
 	elif [ "${repo}" == "API_2.0" ]; then
-		echo "Not yet Enabled"
+		#echo "codebuild -r ${repo} -b feature/fix_carrier_in_bo_import -s team-dev-logistics-1"
+		yq-deploy-api2
+	else
+		echo "Error, not in a project folder. Please go to a valid project folder first"
     fi
 }
 
