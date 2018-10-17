@@ -10,3 +10,10 @@ fi
 set -a
 source ~/.scripts/younique/.yq-env
 set +a
+
+export PATH="/home/sandman/.scripts/younique:${PATH}"
+
+alias deploy-branch="ssh dev 'codebuild -b develop -s team-dev-logistics-1'"
+alias bots-publish="leo-cli publish . --awsprofile dev -e dev"
+alias bots-deploy="sudo leo-cli deploy . GTIOrderImport --awsprofile dev -e dev"
+

@@ -28,6 +28,9 @@ set -a
 source ~/.scripts/general/.gen-env
 set +a
 
+# source any bash scripts here
+export PATH="/home/sandman/.scripts/general:${PATH}"
+
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
 
 # Cool alias, required for following bash function
@@ -280,7 +283,7 @@ apt-installed () {
 ## Given a package list file package.list, try:
 ## sudo apt-get install $(awk '{print $1'} package.list)
 apt-install () {
-	install_file=~/.scripts/packages.list
+	install_file=~/.scripts/setup/packages.list
 	installs=0
 	if [ "$1" == "" ]; then
 		packages=($(awk '! /^ *(#|$)/' $install_file))
@@ -573,7 +576,6 @@ mkcd() {
 
 # source ssh config extension if it doesn't exist
 [ -f ~/.ssh/config-ext ] && source ~/.ssh/config-ext
-[ -f ~/.scripts/.work.profile ] && source ~/.scripts/.work.profile
 
 alias plex="screen -dm chromium-browser --app=https://plex.tv"
 alias outlook="screen -dm chromium-browser --app=https://outlook.office.com"
