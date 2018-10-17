@@ -1,6 +1,29 @@
-# parse env file. will fail if doesn't exist
+SCRIPT_ENTRY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 set -a
-source ~/.scripts/general/.profile
-source ~/.scripts/younique/.profile
+	source "$SCRIPT_ENTRY_DIR/.env"
 set +a
 
+for location in ${SCRIPT_LOCATIONS[*]}; do
+	dir="$SCRIPT_ENTRY_DIR/$location"
+# ENABLE ENV SUPPORT
+    # Source the profile
+	set -a
+		source "$dir/.profile"
+	set +a
+    ## create an env file if it doesn't exist
+	if [ ! -f "$dir/.env" ]; then
+		if [ -f "$dir/.env.ex" ]; then
+			cp "$dir/.env.ex" "$dir/.env"
+		else
+			touch "$dir/.env"
+		fi
+	fi
+    # parse env file. will fail if doesn't exist
+	set -a
+	source "$dir/.env"
+	set +a
+
+# ENABLE LOCAL SCRIPTS
+	export PATH="$dir:${PATH}"
+done

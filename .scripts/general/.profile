@@ -1,6 +1,4 @@
 #!/bin/bash
-NOTES_LOCATIONS="/home/sandman/googledrive/linux_shared_files/.notes"
-
 alias serve='php artisan serve --port=8089'
 function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
@@ -13,23 +11,6 @@ function ctrl_c() {
 	tput ed
 	echo "Command cancelled..."
 }
-
-
-## create an env file if it doesn't exist
-if [ ! -f ~/.scripts/general/.gen-env ]; then
-	if [ -f ~/.scripts/general/.gen-env.ex ]; then
-		cp ~/.scripts/general/.gen-env.ex ~/.scripts/general/.gen-env
-	else
-		touch ~/.scripts/general/.gen-env
-	fi
-fi
-# parse env file. will fail if doesn't exist
-set -a
-source ~/.scripts/general/.gen-env
-set +a
-
-# source any bash scripts here
-export PATH="/home/sandman/.scripts/general:${PATH}"
 
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
 
@@ -79,72 +60,6 @@ _git-select-branch () {
 	if [ "${branch}" == "" ]; then return; fi
 	branch=$(echo ${branch} | sed -r 's/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} - //')
 	echo "${branch}"
-}
-# Interactively select deployment options
-# Req : fzf
-# Use : $ git-deploy .... Follow CLI Prompts
-yq-deploy-gti() {
-	echo "Deploy From:"
-    from_branch=$(_git-select-branch)
-	if [ "${from_branch}" == "" ]; then return; fi
-	echo "${from_branch}"; echo ""
-
-	echo "Deploy To:"
-	to_branch=$(_git-select-branch)
-	if [ "${to_branch}" == "" ]; then return; fi
-	echo "${to_branch}"; echo ""
-
-	#### Begin Deployment Commands 
-	echo "$ git checkout ${to_branch}"
-	git checkout $to_branch
-	echo "$ git reset --hard ${from_branch}"
-	git reset --hard $from_branch
-	echo "$ git push origin ${to_branch} --force"
-	git push origin $to_branch --force
-	echo "$ git checkout -"
-	git checkout -
-}
-yq-deploy-code () {
-	echo "Deploy From:"
-	from_branch=$(_git-select-branch)
-	if [ "${from_branch}" == "" ]; then return; fi
-	echo "${from_branch}"; echo ""
-
-    read -p "Deploy To (EX: team-dev-logistics-1) : " to_branch
-    if [ "${to_branch}" == "" ]; then return; fi
-	codebuild -b $from_branch -s $to_branch
-}
-
-yq-deploy-api2 () {
-	echo "Deploy From:"
-	from_branch=$(_git-select-branch)
-	if [ "${from_branch}" == "" ]; then return; fi
-	echo "${from_branch}"; echo ""
-
-    read -p "Deploy To (EX: team-dev-logistics-1) : " to_branch
-    if [ "${to_branch}" == "" ]; then return; fi
-    repo=$(basename `git rev-parse --show-toplevel`)
-	codebuild -r $repo -b $from_branch -s $to_branch
-}
-yq-deploy () {
-	# Get base repo name
-    repo=$(basename `git rev-parse --show-toplevel`)
-	echo "Deploying for Repo: '${repo}'"
-
-	# Do something if it's a GTI repo
-	if [ "${repo}" == "gti" ]; then
-    	yq-deploy-gti
-	elif [ "${repo}" == "code" ]; then
-		yq-deploy-code
-	elif [ "${repo}" == "logistics" ]; then
-        echo "$ leo-cli publish . --awsprofile dev -e dev"
-        echo "$ leo-cli deploy . GTIOrderImport --awsprofile dev -e dev"
-	elif [ "${repo}" == "API_2.0" ]; then
-		#echo "codebuild -r ${repo} -b feature/fix_carrier_in_bo_import -s team-dev-logistics-1"
-		yq-deploy-api2
-	else
-		echo "Error, not in a project folder. Please go to a valid project folder first"
-    fi
 }
 
 # search folders recursively looking for files that contain given word.
@@ -351,10 +266,10 @@ _net-test-speed-results () {
 #alias phpunit="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 #alias composer="echo '$(tput setaf 1)Please run this command from your remote! $(tput sgr 0)'"
 
-uu () {
+uu-classic () {
 	sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
 }
-uu-test () {
+uu () {
     STATUS_OK=0
     STATUS_WARNING=1
     STATUS_CRITICAL=2
@@ -392,11 +307,9 @@ export HISTTIMEFORMAT="%d/%m/%y %T "
 #if [ -f ~/.scripts ]; then
 #    . ~/.scripts
 #fi
-export PATH="/home/sandman/.scripts:${PATH}"
 alias bash-src="source ~/.profile"
 alias bash-edit="vim ~/.scripts/general/.profile"
 alias bash-gen="vim ~/.scripts/general/.profile"
-alias bash-yq="vim ~/.scripts/younique/.profile"
 alias ssh-edit="vim ~/.ssh/config"
 alias tmux-edit="vim ~/.tmux.conf"
 alias users-list="cut -d: -f1 /etc/passwd"
@@ -699,4 +612,3 @@ logs-show-recent () {
 }
 
 alias wanip='dig +short myip.opendns.com @resolver1.opendns.com'
-[ -f ~/.scripts/.profile.local ] && source ~/.scripts/.profile.local
