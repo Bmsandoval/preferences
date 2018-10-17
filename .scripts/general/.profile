@@ -364,7 +364,7 @@ uu-test () {
     updates=$(/usr/lib/update-notifier/apt-check 2>&1)
     if [ $? -ne 0 ]; then
         echo "Querying pending updates failed."
-        exit $STATUS_UNKNOWN
+        return $STATUS_UNKNOWN
     fi
 
 	# UPDATE IF THERE ARE ANY
