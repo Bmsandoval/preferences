@@ -66,3 +66,10 @@ sudo apt install gcc g++ libfreetype6-dev libglib2.0-dev libcairo2-dev libunistr
 git clone https://github.com/kovidgoyal/kitty.git
 cd kitty
 python3 setup.py build
+
+# set global gitignore
+git config --global core.excludesfile '~/.gitignore_global'
+
+
+
+
