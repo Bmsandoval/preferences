@@ -1,0 +1,6 @@
+# parse env file. will fail if doesn't exist
+set -a
+source ~/.scripts/general/.profile
+source ~/.scripts/younique/.profile
+set +a
+

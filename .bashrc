@@ -160,4 +160,4 @@ j() {
 
 # Run twolfson/sexy-bash-prompt
 . ~/.bash_prompt
-source ~/.scripts/.profile
+source ~/.scripts/general/.profile

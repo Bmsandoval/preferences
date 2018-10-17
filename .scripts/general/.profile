@@ -16,16 +16,16 @@ function ctrl_c() {
 
 
 ## create an env file if it doesn't exist
-if [ ! -f ~/.scripts/.sh-env ]; then
-	if [ -f ~/.scripts/.sh-env.ex ]; then
-		cp ~/.scripts/.sh-env.ex ~/.scripts/.sh-env
+if [ ! -f ~/.scripts/general/.gen-env ]; then
+	if [ -f ~/.scripts/general/.gen-env.ex ]; then
+		cp ~/.scripts/general/.gen-env.ex ~/.scripts/general/.gen-env
 	else
-		touch ~/.scripts/.sh-env
+		touch ~/.scripts/general/.gen-env
 	fi
 fi
 # parse env file. will fail if doesn't exist
 set -a
-source ~/.scripts/.sh-env
+source ~/.scripts/general/.gen-env
 set +a
 
 export XDEBUG_CONFIG="idekey=PHPSTORM remote_host=127.0.0.1 remote_port=9000"
@@ -391,7 +391,9 @@ export HISTTIMEFORMAT="%d/%m/%y %T "
 #fi
 export PATH="/home/sandman/.scripts:${PATH}"
 alias bash-src="source ~/.profile"
-alias bash-edit="vim ~/.scripts/.profile"
+alias bash-edit="vim ~/.scripts/general/.profile"
+alias bash-gen="vim ~/.scripts/general/.profile"
+alias bash-yq="vim ~/.scripts/younique/.profile"
 alias ssh-edit="vim ~/.ssh/config"
 alias tmux-edit="vim ~/.tmux.conf"
 alias users-list="cut -d: -f1 /etc/passwd"
