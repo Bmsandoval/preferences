@@ -493,6 +493,7 @@ mkcd() {
 alias plex="screen -dm chromium-browser --app=https://plex.tv"
 alias outlook="screen -dm chromium-browser --app=https://outlook.office.com"
 alias messages="screen -dm chromium-browser --app=https://messages.android.com"
+alias gti="screen -dm chromium-browser --app=https://bsandovalgti.younique-dev.io"
 fix-monitor-layout () {
 	. ~/.screenlayout/prepareWork.sh && \
 	sleep 2
