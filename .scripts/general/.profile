@@ -187,10 +187,13 @@ bash-function () {
 # Given a package name, returns 1 if package is installed
 apt-installed () {
 	if [ "$1" == "" ]; then
+		echo "no argument provided"
 		return 1 # empty? just say installed
 	elif dpkg --get-selections | grep -q "^$1[[:space:]]*install$" >/dev/null; then
+		echo "${1}: YES"
 		return 1 # installed
 	else
+		echo "${1}: NO"
 		return 0 # not installed
 	fi
 }

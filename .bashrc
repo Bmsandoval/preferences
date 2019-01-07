@@ -158,7 +158,11 @@ j() {
 #	guake -n " " -e "$1" --show
 #}
 
+#NGROK_INSTALL_PATH=~/applications/ngrok
+#export PATH=$PATH:$NGROK_INSTALL_PATH
+
 # Run twolfson/sexy-bash-prompt
 . ~/.bash_prompt
 #source ~/.scripts/general/.profile
 source ~/.scripts/.script_entry
+
