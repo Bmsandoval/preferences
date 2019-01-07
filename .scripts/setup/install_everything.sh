@@ -67,6 +67,10 @@ git clone https://github.com/kovidgoyal/kitty.git
 cd kitty
 python3 setup.py build
 
+# install Cat substitute, Bat
+wget https://github.com/sharkdp/bat/releases/download/v0.9.0/bat-musl_0.9.0_amd64.dat
+sudo dpkg -i bat-musl_0.9.0_amd64.dat
+
 # set global gitignore
 git config --global core.excludesfile '~/.gitignore_global'
 

@@ -613,3 +613,12 @@ logs-show-recent () {
 }
 
 alias wanip='dig +short myip.opendns.com @resolver1.opendns.com'
+
+chromium-marquis () {
+	if [[ -z "$1" ]]; then
+		echo "no url provided"
+	else
+		# --incognito if needed
+		screen -dm chromium-browser --app="${1}"
+	fi
+}

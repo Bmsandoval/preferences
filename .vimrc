@@ -72,8 +72,10 @@ Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'dhruvasagar/vim-table-mode'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'tpope/vim-surround'
-Plugin 'scrooloose/nerdtree'
 Plugin 'justinmk/vim-sneak'
+Plugin 'vim-airline/vim-airline'
+Plugin 'severin-lemaignan/vim-minimap'
+
 "map <C-n> :NERDTreeToggle<CR>
 nnoremap <Leader>n :NERDTreeToggle<CR>
 " autocmd vimenter * NERDTree
@@ -81,9 +83,9 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 Plugin 'tpope/vim-fugitive'
 " Plugin 'w0rp/ale'
 """""""" END PLUGINS
-
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
+
 filetype plugin indent on    " required
 " Vim5 and later versions support syntax highlighting. Uncommenting the next
 " line enables syntax highlighting by default.
