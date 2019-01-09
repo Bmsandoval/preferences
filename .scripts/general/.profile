@@ -1,4 +1,5 @@
 #!/bin/bash
+alias git-logs='git log --oneline --graph'
 alias serve='php artisan serve --port=8089'
 function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
