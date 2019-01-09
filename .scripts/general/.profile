@@ -206,11 +206,12 @@ apt-install () {
 	if [ "$1" == "" ]; then
 		packages=($(awk '! /^ *(#|$)/' $install_file))
 		for pkg in "${packages[@]}"; do
-			$(apt-installed "$pkg")
-			if [ "$?" -eq "0" ]; then
-				sudo apt install -y $pkg
+			#$(apt-installed "${pkg}")
+			#echo "installing ${?}"
+			#if [ "${?}" -eq "0" ]; then
+				sudo apt install -y "${pkg}"
 				installs=1
-			fi
+			#fi
 		done
 	else
     	additions=0
