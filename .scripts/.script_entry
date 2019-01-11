@@ -1,15 +1,18 @@
 #!/bin/bash
 
+# Get current directory
 SCRIPT_ENTRY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
+# source local env file
 set -a
 	source "$SCRIPT_ENTRY_DIR/.env"
 set +a
 
+# go through all sub script directories. Listed in env.
+# NOTE - only add directories to env that you want access to on this machine.
 for location in ${SCRIPT_LOCATIONS[*]}; do
 	dir="$SCRIPT_ENTRY_DIR/$location"
-# ENABLE ENV SUPPORT
-    # Source the profile
+    # Source the profile, saved in repo
 	set -a
 		source "$dir/.profile"
 	set +a
@@ -21,11 +24,12 @@ for location in ${SCRIPT_LOCATIONS[*]}; do
 			touch "$dir/.env"
 		fi
 	fi
-    # parse env file. will fail if doesn't exist
+    # Source the env . will fail if doesn't exist
 	set -a
 	source "$dir/.env"
 	set +a
 
-# ENABLE LOCAL SCRIPTS
-	export PATH="$dir:${PATH}"
+	# Look for files in location that end with .sh, add them to user space
+	find "$dir" -iname '*.sh' -execdir sudo ln -f {} /usr/local/bin \;
+	#export PATH="$dir:${PATH}"
 done

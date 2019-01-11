@@ -11,6 +11,24 @@ update-notifier-common
 smokeping
 nmon
 make
+
+# begin i3
 menu
 i3
+i3-wm
+dunst
+i3lock
+i3status
+suckless-tools
+compton
+hsetroot
+rxvt-unicode
+xsel
+rofi
+fonts-noto
+xsettingsd
+lxappearance
+scrot
+viewnior
+# end i3
 

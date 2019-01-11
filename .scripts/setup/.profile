@@ -1,2 +1,2 @@
 # source any bash scripts here
-export PATH="/home/sandman/.scripts/setup:${PATH}"
+#export PATH="/home/sandman/.scripts/setup:${PATH}"

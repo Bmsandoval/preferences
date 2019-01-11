@@ -32,6 +32,9 @@ floating_modifier $mod
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
 
+# lock screen
+bindsym $mod+; exec lock-screen.sh
+
 # kill focused window
 bindsym $mod+Shift+q kill
 
@@ -155,4 +158,8 @@ bar {
         status_command i3status
 }
 
-exec guake
+exec --no-startup-id guake
+exec --no-startup-id xsettingsd &
+exec --no-startup-id compton -b
+# exec --no-startup-id hsetroot -center ~/.wallpaper.png
+
