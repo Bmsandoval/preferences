@@ -47,10 +47,10 @@ random-pic () {
 }
 
 # randomly select wallpaper src
-if [ $(shuf -i 1-3 -n1) = "3" ]; then
-    pic=$(random-pic "$IMGS_DIR")
-else
+#if [ $(shuf -i 1-3 -n1) = "3" ]; then
+#    pic=$(random-pic "$IMGS_DIR")
+#else
     pic=$(blur-shot)
-fi
+#fi
 
 command-exist-p i3lock && exec i3lock -d -i "$pic"

@@ -627,3 +627,9 @@ chromium-marquis () {
 		screen -dm chromium-browser --app="${1}"
 	fi
 }
+
+# Good idea, but I had 3 monitors plugged in and it showed a count of 4 (unused laptop monitor)
+#wallpaper-set-random () {
+#	NUM_MONITORS=$(xrandr -d :0 -q | grep ' connected' | wc -l)
+#	find dirname -type f | shuf -n "$NUM_MONITORS"
+#}
