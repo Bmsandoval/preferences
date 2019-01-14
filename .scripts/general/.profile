@@ -331,42 +331,15 @@ bind -x '"\C-f": cdg'
 ############ TODO : CAN i JUST SOURCE MY .PROFILE IN THE PREVIEW???
 #bind -x '"\C-b": find-command'
 alias fc="find-command"
-alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^{}'"
+#alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^{}'"
+#alias find-command="compgen -A function -abck | fzf --preview \"bat $(readlink -f $(type {} | cut -f 3 -d \' \'))\""
+find-command () {
+	$(compgen -A function -abck | fzf --preview "bat \$(readlink -f \$(type {} | cut -f 3 -d ' '))")
+}
+#bat $(readlink -f $(type slack.sh | cut -f 3 -d " "))
 
 alias hs="host-ssh"
-host-ssh () {
-        target=$(fzf < <(cat <(compgen -A function -abck | command grep -i '^ssh-') <(compgen -A function -abck | command grep -i '^rdp-') \
-          <(cat ~/.ssh/config /etc/ssh/ssh_config 2> /dev/null | command grep -i '^host ' | command grep -v '[*?]' | awk '{for (i = 2; i <= NF; i++) print $1 " " $i}')
-         ))
-	if [[ $target == ssh-* ]]; then
-		eval $target
-	elif [[ $target == Host* ]]; then
-		target=$(echo "$target" | sed -r 's/Host//I')
-		eval ssh -t $target
-	fi
-}
-
 alias nf="note-find"
-note-find () {
-  target=$(cd $NOTES_LOCATIONS; find . | fzf --preview="if [[ -f {} ]]; then cat {}; elif [[ -n {} ]]; then tree -C {}; fi" --preview-window=right:60%:wrap --reverse)
-  if [[ "$target" != '' ]]; then
-    target="$NOTES_LOCATIONS/${target:2}"
-    if [[ -f "$target" ]]; then
-      #### TODO : currently preview shows the local lines around the line you are looking at. would like to highlight the actual line, and open at that line if I select it
-      search=$(cat -n "$target" | fzf --preview="val=\$(echo {} | sed -e 's/^[[:space:]]*//' | tr -s ' ' | cut -f1 -d$'\t'); if [[ \$val -le 8 ]]; then val=8; fi; cat -n $target | sed -n \$((\$val-7)),\$((\$val+7))p")
-      #echo $(cut -d' ' -f1 <<< $(echo "$search"))
-
-      vim "$target"
-      #nf ### uncomment this to cycle if you are still in the notes
-    elif [[ -n "$target" ]]; then
-      if [[ "$target" != '.' ]]; then
-        cd "$target"
-      else
-        cd "$NOTES_LOCATIONS"
-      fi
-    fi
-  fi
-}
 
 alias nn="note-new"
 note-new () {
@@ -505,46 +478,6 @@ fix-monitor-layout () {
 	. ~/.screenlayout/setWork.sh && \
 	sleep 2
 	. ~/.screenlayout/readyForWork.sh
-}
-SLACK_THEME_FILE="/usr/lib/slack/resources/app.asar.unpacked/src/static/ssb-interop.js"
-fix-slack-dark-mode () {
-	cat <<EOT >> "$SLACK_THEME_FILE"
-document.addEventListener("DOMContentLoaded", function() {
-
-   // Then get its webviews
-   let webviews = document.querySelectorAll(".TeamView webview");
-
-   // Fetch our CSS in parallel ahead of time
-   const cssPath = 'https://raw.githubusercontent.com/angelsix/youtube/develop/Windows%2010%20Dark%20Theme/Slack/slack-dark.css';
-   let cssPromise = fetch(cssPath).then(response => response.text());
-
-   // Insert a style tag into the wrapper view
-   cssPromise.then(css => {
-	  let s = document.createElement('style');
-	  s.type = 'text/css';
-	  s.innerHTML = css;
-	  document.head.appendChild(s);
-   });
-
-   // Wait for each webview to load
-   webviews.forEach(webview => {
-	  webview.addEventListener('ipc-message', message => {
-		 if (message.channel == 'didFinishLoading')
-			// Finally add the CSS into the webview
-			cssPromise.then(css => {
-			   let script = `
-					 let s = document.createElement('style');
-					 s.type = 'text/css';
-					 s.id = 'slack-custom-css';
-					 s.innerHTML = \`${css}\`;
-					 document.head.appendChild(s);
-					 `
-			   webview.executeJavaScript(script);
-			})
-	  });
-   });
-});
-EOT
 }
 
 fix-mouse-controls () {

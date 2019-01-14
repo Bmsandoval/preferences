@@ -1,4 +1,14 @@
 ###### SETUP ######
+package-installed () {
+	result=$(compgen -A function -abck | grep ^$1$)
+	if [ "${result}" == "$1" ]; then
+		# package installed
+		return 0
+	else
+		# package not installed
+		return 1
+	fi
+}
 
 ###### INSTALL_FROM_SOURCES ######
 #apt-install all necessary programs
@@ -22,12 +32,15 @@
 
 ###### JUST FOLLOW THEIR GUIDE  ######
 # insync (google drive)
+# with i3 I found it easier to configure with the headless
 
 ###### AUTOJUMP ######
 # only need the apt-install, rest should be in git preferences
 
 ###### INSTALL APPLICATIONS ######
-#mkdir applications
+if [ ! -d ~/applications ]; then
+	mkdir -p ~/applications
+fi
 
 ###### SEXY_BASH_PROMPT ######
 #cd applications
@@ -38,11 +51,15 @@
 #cd ~
 
 ###### FZF ######
-#cd applications
-#git clone git@github.com:junegunn/fzf.git
-#cd fzf
-#./install
-#cd ~
+package-installed fzf
+if [ "$?" == "1" ]; then
+	cd ~/applications
+	git clone git@github.com:junegunn/fzf.git
+	cd -
+	cd fzf
+	./install
+	cd -
+fi
 
 ###### ALBERT ######
 #wget -nv -O Release.key  https://build.opensuse.org/projects/home:manuelschneid3r/public_key
@@ -54,26 +71,21 @@
 
 ###### KITTY TERMINAL????? ######
 # update address via http://www.linuxfromscratch.org/blfs/view/svn/general/harfbuzz.html
-wget https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-1.8.8.tar.bz2
-./configure --prefix=/usr --with-gobject &&
-sudo apt install libgl1-mesa-dev libpng16-dev apt-file
-# ? sudo apt-file update ?
-apt-file search fontconfig.pc
-make
-sudo make install
-
-sudo apt install gcc g++ libfreetype6-dev libglib2.0-dev libcairo2-dev libunistring0 libunistring-dev libxkbcommon-x11-0 libxkbcommon-x11-dev wayland-protocols
-git clone https://github.com/kovidgoyal/kitty.git
-cd kitty
-python3 setup.py build
+package-installed kitty
+if [ "$?" == "1" ]; then
+	curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+	sudo ln -s ~/.local/kitty.app/bin/kitty /usr/local/bin/
+fi
 
 # install Cat substitute, Bat
-wget https://github.com/sharkdp/bat/releases/download/v0.9.0/bat-musl_0.9.0_amd64.dat
-sudo dpkg -i bat-musl_0.9.0_amd64.dat
+package-installed bat
+if [ "$?" == "1" ]; then
+	wget https://github.com/sharkdp/bat/releases/download/v0.9.0/bat-musl_0.9.0_amd64.deb
+	sudo dpkg -i bat-musl_0.9.0_amd64.deb
+	rm bat-musl_0.9.0_amd64.deb
+fi
 
 # set global gitignore
 git config --global core.excludesfile '~/.gitignore_global'
 
-
-
-
+bash-src-scripts

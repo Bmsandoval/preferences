@@ -11,7 +11,7 @@ update-notifier-common
 smokeping
 nmon
 make
-
+tree
 # begin i3
 menu
 i3
@@ -31,4 +31,4 @@ lxappearance
 scrot
 viewnior
 # end i3
-
+parcellite
