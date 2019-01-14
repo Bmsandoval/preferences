@@ -327,6 +327,7 @@ alias list-specs="inxi -Fz"
 bind -x '"\C-p": vim $(fzf);'
 bind -x '"\C-g": git log --pretty=oneline --abbrev-commit | fzf --preview "echo {} | cut -f 1 -d \" \" --reverse | xargs git show --color=always"'
 bind -x '"\C-f": cdg'
+bind -x '"\C-\M-;": lock-screen'
 ## commonly used command, let's give it a few shortcuts
 ############ TODO : CAN i JUST SOURCE MY .PROFILE IN THE PREVIEW???
 #bind -x '"\C-b": find-command'
