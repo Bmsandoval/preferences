@@ -32,3 +32,7 @@ scrot
 viewnior
 # end i3
 parcellite
+gconf2
+gconf-service
+libappindicator1
+autoconf

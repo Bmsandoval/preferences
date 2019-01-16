@@ -88,4 +88,11 @@ fi
 # set global gitignore
 git config --global core.excludesfile '~/.gitignore_global'
 
+# install i3-gaps AFTER installing i3
+#https://github.com/Airblader/i3
+#### EASIER INSTALLATION BELOW
+#https://github.com/maestrogerardo/i3-gaps-deb
+
+# install i3blocks-gaps
+#https://github.com/Airblader/i3blocks-gaps
 bash-src-scripts

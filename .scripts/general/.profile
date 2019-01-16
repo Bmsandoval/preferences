@@ -187,10 +187,10 @@ bash-function () {
 
 # Given a package name, returns 1 if package is installed
 apt-installed () {
-	if [ "$1" == "" ]; then
+	if [ "${1}" == "" ]; then
 		echo "no argument provided"
 		return 1 # empty? just say installed
-	elif dpkg --get-selections | grep -q "^$1[[:space:]]*install$" >/dev/null; then
+	elif dpkg --get-selections | grep -q "^${1}[[:space:]]*install$" >/dev/null; then
 		echo "${1}: YES"
 		return 1 # installed
 	else
@@ -204,7 +204,7 @@ apt-installed () {
 apt-install () {
 	install_file=~/.scripts/setup/packages.list
 	installs=0
-	if [ "$1" == "" ]; then
+	if [ "${1}" == "" ]; then
 		packages=($(awk '! /^ *(#|$)/' $install_file))
 		for pkg in "${packages[@]}"; do
 			#$(apt-installed "${pkg}")
@@ -218,25 +218,25 @@ apt-install () {
     	additions=0
     	# install as many packages as given
 		for pkg in "$@"; do
-            val=$(grep -x "^$pkg" $install_file)
+            val=$(grep -x "^${pkg}" $install_file)
 			# if it's not in the file, add it
-            if [ "$val" == "" ]; then
-                echo "$pkg" >> $install_file
+            if [ "${val}" == "" ]; then
+                echo "${pkg}" >> "${install_file}"
                 echo "Added ${pkg} to ${install_file}"
-				additions=1
+				#additions=1
             fi
 
             # optimized installation check
-            $(apt-installed "$pkg")
+            $(apt-installed "${pkg}")
 			# if not installed, install it.
-            if [ "$?" -eq "0" ]; then
-                sudo apt install -y $pkg
+            if [ "${?}" -eq "0" ]; then
+                sudo apt install -y "${pkg}"
                 installs=1
             fi
 		done
-		if [ "$additions" -eq "1" ]; then
-			echo "" >> $install_file
-		fi
+		#if [ "$additions" -eq "1" ]; then
+		#	echo "" >> $install_file
+		#fi
 	fi
     if [ "$installs" -eq "0" ]; then
         echo "nothing to install"
