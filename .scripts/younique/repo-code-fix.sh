@@ -22,9 +22,17 @@ rsync -r --exclude='CodeDeploy' --exclude='CodeBuild' --exclude='.idea' --exclud
 # Clean up afterwards
 ssh dev <<EOF
 cd ${remote_dir}
-sudo chmod +x composer.sh
-sudo ./composer.sh
-sudo find ${remote_dir} -type d -exec chmod 0755 {} +
-sudo find ${remote_dir} -type f -exec chmod 0644 {} +
+sudo find ${remote_dir} -type d -exec chmod 0750 {} +
+sudo find ${remote_dir} -type f -exec chmod 0640 {} +
 sudo chown -R ${whoami}:www-data ${remote_dir} 
+sudo npm install
+sudo chmod -R 777 api/tmp
+sudo npm install -g grunt-cli
+if [[ ! -f /usr/bin/node ]]; then ln -s /usr/bin/nodejs /usr/bin/node; fi;
+cd admin && sudo npm install && sudo npm run install-dnd && sudo npm run install-jgrowl && sudo composer install && cd ../
+cd cake/app && sudo npm install && sudo composer install && cd ../../
+cd api && sudo npm install && sudo composer install && cd ../
+cd api/aws3 && sudo composer install && cd ../../
+chmod +x api/Console/cake
+sudo api/Console/cake phinx migrate
 EOF

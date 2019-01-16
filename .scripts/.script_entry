@@ -1,31 +1,69 @@
 #!/bin/bash
 
+# Get current directory
 SCRIPT_ENTRY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-set -a
-	source "$SCRIPT_ENTRY_DIR/.env"
-set +a
 
-for location in ${SCRIPT_LOCATIONS[*]}; do
-	dir="$SCRIPT_ENTRY_DIR/$location"
-# ENABLE ENV SUPPORT
-    # Source the profile
-	set -a
-		source "$dir/.profile"
-	set +a
-    ## create an env file if it doesn't exist
-	if [ ! -f "$dir/.env" ]; then
-		if [ -f "$dir/.env.ex" ]; then
-			cp "$dir/.env.ex" "$dir/.env"
+bash-src-envs () {
+	# source local env file
+	if [ ! -f "$SCRIPT_ENTRY_DIR/.env" ]; then
+		if [ -f "$SCRIPT_ENTRY_DIR/.env.ex" ]; then
+			cp "$SCRIPT_ENTRY_DIR/.env.ex" "$SCRIPT_ENTRY_DIR/.env"
 		else
-			touch "$dir/.env"
+			touch "$SCRIPT_ENTRY_DIR/.env"
 		fi
 	fi
-    # parse env file. will fail if doesn't exist
 	set -a
-	source "$dir/.env"
+		source "$SCRIPT_ENTRY_DIR/.env"
 	set +a
 
-# ENABLE LOCAL SCRIPTS
-	export PATH="$dir:${PATH}"
-done
+	# source env files from selected workspaces
+	for location in ${SCRIPT_LOCATIONS[*]}; do
+		dir="$SCRIPT_ENTRY_DIR/$location"
+		## create an env file if it doesn't exist
+		if [ ! -f "$dir/.env" ]; then
+			if [ -f "$dir/.env.ex" ]; then
+				cp "$dir/.env.ex" "$dir/.env"
+			else
+				touch "$dir/.env"
+			fi
+		fi
+		# Source the env . will fail if doesn't exist
+		set -a
+			source "$dir/.env"
+		set +a
+	done
+}
+# source these on startup
+bash-src-envs
+
+bash-src-profiles () {
+	# go through all sub script directories. Listed in env.
+	# NOTE - only add directories to env that you want access to on this machine.
+	for location in ${SCRIPT_LOCATIONS[*]}; do
+		dir="$SCRIPT_ENTRY_DIR/$location"
+		# Source the profile, saved in repo
+		if [ ! -f "$dir/.profile" ]; then
+			touch "$dir/.profile"
+		fi
+		set -a
+			source "$dir/.profile"
+		set +a
+
+		#export PATH="$dir:${PATH}"
+	done
+}
+# source these on startup
+bash-src-profiles
+
+
+bash-src-scripts () {
+	for location in ${SCRIPT_LOCATIONS[*]}; do
+		dir="$SCRIPT_ENTRY_DIR/$location"
+
+		# Look for files in location that end with .sh, add link them to user space
+		find "$dir" -iname '*.sh' -print0 \
+			| xargs --null -I{} sh -c 'sudo ln -f {} /usr/local/bin/$(basename {} .sh)'
+	done
+}
+# only run this selectively (like initial install)
