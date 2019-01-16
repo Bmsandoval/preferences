@@ -156,3 +156,4 @@ bar {
 }
 
 exec guake
+exec insync-headless start
