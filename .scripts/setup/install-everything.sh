@@ -102,7 +102,8 @@ if [ "$?" == "1" ]; then # can't check for gaps, look for blocks instead
 	#https://github.com/maestrogerardo/i3-gaps-deb
 	git clone git@github.com:maestrogerardo/i3-gaps-deb.git ~/applications/i3-gaps-deb
 	cd ~/applications/i3-gaps-deb
-	# edit /etc/apt/sources.list and uncomment all deb-src lines
+	# uncomment all deb-src lines from /etc/apt/sources.list
+	sudo sed -i '/deb-src/s/^# //g' /etc/apt/sources.list.save
 	sudo apt update
 	./i3-gaps-deb
 
