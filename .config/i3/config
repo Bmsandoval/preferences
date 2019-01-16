@@ -164,6 +164,7 @@ exec --no-startup-id compton -b
 exec --no-startup-id insync-headless start
 # exec --no-startup-id hsetroot -center ~/.wallpaper.png
 exec watch -n 1200 feh --randomize --bg-fill ~/googledrive/wallpapers/spaaace/*
+exec --no-startup-id diodon
 
 ### i3-gaps stuff ###
 
@@ -218,4 +219,3 @@ mode "$mode_gaps_outer" {
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
-

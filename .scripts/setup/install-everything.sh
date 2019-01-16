@@ -88,11 +88,30 @@ fi
 # set global gitignore
 git config --global core.excludesfile '~/.gitignore_global'
 
-# install i3-gaps AFTER installing i3
-#https://github.com/Airblader/i3
-#### EASIER INSTALLATION BELOW
-#https://github.com/maestrogerardo/i3-gaps-deb
+# install diodon
+package-installed diodon
+if [ "$?" == "1" ]; then
+	sudo add-apt-repository ppa:diodon-team/stable
+	sudo apt install diodon
+fi
 
-# install i3blocks-gaps
-#https://github.com/Airblader/i3blocks-gaps
+package-installed i3blocks
+if [ "$?" == "1" ]; then # can't check for gaps, look for blocks instead
+	# install i3-gaps
+	#https://github.com/Airblader/i3
+	#https://github.com/maestrogerardo/i3-gaps-deb
+	git clone git@github.com:maestrogerardo/i3-gaps-deb.git ~/applications/i3-gaps-deb
+	cd ~/applications/i3-gaps-deb
+	# edit /etc/apt/sources.list and uncomment all deb-src lines
+	sudo apt update
+	./i3-gaps-deb
+
+	# install i3blocks-gaps
+	#https://github.com/Airblader/i3blocks-gaps
+	git clone https://github.com/Airblader/i3blocks-gaps ~/applications/i3blocks
+	cd ~/applications/i3blocks
+	make clean debug
+	sudo make install
+fi
+
 bash-src-scripts

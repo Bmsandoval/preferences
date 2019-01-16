@@ -13,3 +13,4 @@
 !/applications
 !.bash_prompt
 !.taskbook.json
+!.i3blocks.conf
