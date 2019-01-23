@@ -172,14 +172,14 @@ exec --no-startup-id diodon
 for_window [class="^.*"] border pixel 3
 
 # Smart Gaps
-smart_gaps on
+#smart_gaps on
 
 # Smart Borders
-smart_borders on
+#smart_borders on
 
 # Set inner/outer gaps
-gaps inner 14
-gaps outer 0
+#gaps inner 14
+#gaps outer 0
 
 # Gaps mode
 set $mode_gaps Gaps: (o) outer, (i) inner
