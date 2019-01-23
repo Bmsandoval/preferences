@@ -89,6 +89,7 @@ fi
 git config --global core.excludesfile '~/.gitignore_global'
 
 # install diodon
+echo "checking diodon"
 package-installed diodon
 if [ "$?" == "1" ]; then
 	sudo add-apt-repository ppa:diodon-team/stable
@@ -115,4 +116,4 @@ if [ "$?" == "1" ]; then # can't check for gaps, look for blocks instead
 	sudo make install
 fi
 
-bash-src-scripts
+echo "recommend running 'bash-src-scripts'"
