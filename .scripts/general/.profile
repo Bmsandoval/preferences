@@ -366,11 +366,11 @@ note-find () {
 
 alias ne="note-edit"
 note-edit () {
-  location=$(cd $SCRIPTS_LOCATIONS; find . -type f | fzf --preview="bat {}" --preview-window=right:60%:wrap --multi --reverse)
+  location=$(cd $NOTES_LOCATIONS; find . -type f | fzf --preview="bat {}" --preview-window=right:60%:wrap --multi --reverse)
   # strip leading dot that find leaves behind
   location=${location/./}
   # append path
-  location="$SCRIPTS_LOCATIONS/$location"
+  location="$NOTES_LOCATIONS/$location"
   # select line
   lines=$(cat -n "$location" | fzf)
   # following 3 lines get the line number that cat -n gave us
