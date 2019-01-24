@@ -313,7 +313,7 @@ export HISTTIMEFORMAT="%d/%m/%y %T "
 #    . ~/.scripts
 #fi
 alias bash-src="source ~/.profile"
-alias bash-edit="vim ~/.scripts/general/.profile"
+alias bash-base="vim ~/.bashrc"
 alias bash-gen="vim ~/.scripts/general/.profile"
 alias ssh-edit="vim ~/.ssh/config"
 alias tmux-edit="vim ~/.tmux.conf"

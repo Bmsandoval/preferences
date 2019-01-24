@@ -158,6 +158,7 @@ bar {
         status_command i3status
 }
 
+# background programs to run on startup
 exec --no-startup-id guake
 exec --no-startup-id xsettingsd &
 exec --no-startup-id compton -b
