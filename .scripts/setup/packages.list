@@ -36,3 +36,5 @@ gconf2
 gconf-service
 libappindicator1
 autoconf
+pavucontrol
+pasystray

@@ -163,9 +163,13 @@ exec --no-startup-id guake
 exec --no-startup-id xsettingsd &
 exec --no-startup-id compton -b
 exec --no-startup-id insync-headless start
+## Tray Icons
+exec --no-startup-id nm-applet # network
+exec --no-startup-id diodon # clipboard
+exec --no-startup-id pasystray # volume
+
 # exec --no-startup-id hsetroot -center ~/.wallpaper.png
 exec watch -n 1200 feh --randomize --bg-fill ~/googledrive/wallpapers/spaaace/*
-exec --no-startup-id diodon
 
 ### i3-gaps stuff ###
 
@@ -173,14 +177,14 @@ exec --no-startup-id diodon
 for_window [class="^.*"] border pixel 3
 
 # Smart Gaps
-smart_gaps on
+#smart_gaps on
 
 # Smart Borders
-smart_borders on
+#smart_borders on
 
 # Set inner/outer gaps
-gaps inner 14
-gaps outer 0
+#gaps inner 14
+#gaps outer 0
 
 # Gaps mode
 set $mode_gaps Gaps: (o) outer, (i) inner

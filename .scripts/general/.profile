@@ -329,7 +329,6 @@ bind -x '"\C-g": git log --pretty=oneline --abbrev-commit | fzf --preview "echo 
 bind -x '"\C-f": cdg'
 bind -x '"\C-\M-;": lock-screen'
 ## commonly used command, let's give it a few shortcuts
-############ TODO : CAN i JUST SOURCE MY .PROFILE IN THE PREVIEW???
 #bind -x '"\C-b": find-command'
 alias fc="find-command"
 #alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^{}'"
@@ -337,10 +336,51 @@ alias fc="find-command"
 find-command () {
 	$(compgen -A function -abck | fzf --preview "bat \$(readlink -f \$(type {} | cut -f 3 -d ' '))")
 }
+
+alias be="bash-edit"
+bash-edit () {
+  # select a file
+  location=$(cd $SCRIPTS_LOCATIONS; find . -type f | fzf --preview="bat {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
+  # strip leading dot that find leaves behind
+  location=${location/./}
+  # append path
+  location="$SCRIPTS_LOCATIONS/$location"
+  # select line
+  lines=$(cat -n "$location" | fzf)
+  # following 3 lines get the line number that cat -n gave us
+  shopt -s extglob
+  read -r lines _ <<< "${lines//[^[:digit:] ]/}"
+  line=${lines##+(0)}
+  # open file at line number
+  vim +"${line}" "$location"
+}
+runcmd (){ perl -e 'ioctl STDOUT, 0x5412, $_ for split //, <>' ; }
+
 #bat $(readlink -f $(type slack.sh | cut -f 3 -d " "))
 
 alias hs="host-ssh"
-alias nf="note-find"
+alias nf="note-edit"
+note-find () {
+  $(cd $NOTES_LOCATIONS; find . -type f | fzf --preview="bat {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
+}
+
+alias ne="note-edit"
+note-edit () {
+  location=$(cd $SCRIPTS_LOCATIONS; find . -type f | fzf --preview="bat {}" --preview-window=right:60%:wrap --multi --reverse)
+  # strip leading dot that find leaves behind
+  location=${location/./}
+  # append path
+  location="$SCRIPTS_LOCATIONS/$location"
+  # select line
+  lines=$(cat -n "$location" | fzf)
+  # following 3 lines get the line number that cat -n gave us
+  shopt -s extglob
+  read -r lines _ <<< "${lines//[^[:digit:] ]/}"
+  line=${lines##+(0)}
+  # open file at line number
+  vim +"${line}" "$location"
+}
+
 
 alias nn="note-new"
 note-new () {
