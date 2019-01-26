@@ -1,2 +1,4 @@
-SCRIPTS_LOCATIONS="/home/thorson/.scripts"
-NOTES_LOCATIONS="/home/thorson/googledrive/linux_shared_files/.notes"
+SCRIPTS_LOCATIONS="$HOME/.scripts"
+NOTES_LOCATIONS="$HOME/googledrive/linux_shared_files/.notes"
+GOPATH="$SCRIPTS_LOCATIONS/go"
+GOBIN="$GOPATH/bin"
