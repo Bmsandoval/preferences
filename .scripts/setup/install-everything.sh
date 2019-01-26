@@ -100,13 +100,22 @@ package-installed i3blocks
 if [ "$?" == "1" ]; then # can't check for gaps, look for blocks instead
 	# install i3-gaps
 	#https://github.com/Airblader/i3
-	#https://github.com/maestrogerardo/i3-gaps-deb
-	git clone git@github.com:maestrogerardo/i3-gaps-deb.git ~/applications/i3-gaps-deb
-	cd ~/applications/i3-gaps-deb
-	# uncomment all deb-src lines from /etc/apt/sources.list
-	sudo sed -i '/deb-src/s/^# //g' /etc/apt/sources.list.save
-	sudo apt update
-	./i3-gaps-deb
+	sudo add-apt-repository ppa:aguignard/ppa
+	sudo apt-get update
+	sudo apt-get install libxcb-xrm-dev libxcb1-dev libxcb-keysyms1-dev libpango1.0-dev \
+		libxcb-util0-dev libxcb-icccm4-dev libyajl-dev \
+		libstartup-notification0-dev libxcb-randr0-dev \
+		libev-dev libxcb-cursor-dev libxcb-xinerama0-dev \
+		libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev \
+		autoconf libxcb-xrm0 libxcb-xrm-dev automake libxcb-shape0-dev
+	git clone https://www.github.com/Airblader/i3 $HOME/applications/i3-gaps
+	cd $HOME/applications/i3-gaps
+	autoreconf --force --install
+	rm -rf build/
+	mkdir -p build && cd build/
+	../configure --prefix=/usr --sysconfdir=/etc --disable-sanitizers
+	make
+	sudo make install
 
 	# install i3blocks-gaps
 	#https://github.com/Airblader/i3blocks-gaps
