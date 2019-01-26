@@ -96,6 +96,26 @@ if [ "$?" == "1" ]; then
 	sudo apt install diodon
 fi
 
+# google golang
+echo "checking go"
+package-installed "go" 
+if [ "$?" == "1" ]; then
+	cd ~/Downloads
+	wget -c https://storage.googleapis.com/golang/go1.7.3.linux-amd64.tar.gz
+	sudo tar -C /usr/local -xvzf go1.7.3.linux-amd64.tar.gz
+fi
+
+# google golang
+echo "checking sublime"
+package-installed sublime
+if [ "$?" == "1" ]; then
+	curl -fsSL https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+	sudo add-apt-repository "deb https://download.sublimetext.com/ apt/stable/"
+	sudo apt update
+	sudo apt install sublime-text
+fi
+
+# i3blocks
 package-installed i3blocks
 if [ "$?" == "1" ]; then # can't check for gaps, look for blocks instead
 	# install i3-gaps
