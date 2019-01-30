@@ -168,8 +168,8 @@ exec --no-startup-id nm-applet # network
 exec --no-startup-id diodon # clipboard
 exec --no-startup-id pasystray # volume
 
-# exec --no-startup-id hsetroot -center ~/.wallpaper.png
-exec watch -n 1200 feh --randomize --bg-fill ~/googledrive/wallpapers/spaaace/*
+#exec --no-startup-id hsetroot -center ~/googledrive/wallpapers/spaaace/*
+#exec --no-startup-id watch -n 1200 feh --randomize --bg-fill ~/googledrive/wallpapers/spaaace/*
 
 ### i3-gaps stuff ###
 

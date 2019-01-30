@@ -140,7 +140,7 @@ if [ "$?" == "1" ]; then # can't check for gaps, look for blocks instead
 	# install i3blocks-gaps
 	#https://github.com/Airblader/i3blocks-gaps
 	git clone https://github.com/Airblader/i3blocks-gaps ~/applications/i3blocks
-	cd ~/applications/i3blocks
+	cd $HOME/applications/i3blocks
 	make clean debug
 	sudo make install
 fi
