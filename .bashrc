@@ -173,4 +173,4 @@ export NVM_DIR="$HOME/.nvm"
 
 export  PATH=$PATH:/usr/local/go/bin:$GOBIN
 
-feh --randomize --bg-fill $HOME/googledrive/wallpapers/doctor_who
+feh --randomize --bg-fill $HOME/googledrive/wallpapers/active_wallpapers
