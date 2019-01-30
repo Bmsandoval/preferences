@@ -173,4 +173,8 @@ export NVM_DIR="$HOME/.nvm"
 
 export  PATH=$PATH:/usr/local/go/bin:$GOBIN
 
-feh --randomize --bg-fill $HOME/googledrive/wallpapers/active_wallpapers
+[ -f ~/.screenlayout/setup.sh ] && source ~/.screenlayout/setup.sh
+wallpapers-change () {
+	feh --randomize --bg-fill $HOME/googledrive/wallpapers/active_wallpapers
+}
+wallpapers-change
