@@ -77,12 +77,25 @@ yq-deploy-code () {
 	echo "${from_branch}"; echo ""
 
     #read -p "Deploy To (EX: team-dev-logistics-1) : " to_branch
-	to_branch=$(printf "%s\n" "${CODE_DEPLOY_LOCATIONS[@]}" | fzf)
-    if [ "${to_branch}" == "" ]; then return; fi
-	echo "codebuild -b $from_branch -s $to_branch"
-	ssh -t dev "codebuild -b $from_branch -s $to_branch"
+#	to_branch=$(printf "%s\n" "${CODE_DEPLOY_LOCATIONS[@]}" | fzf)
+#    if [ "${to_branch}" == "" ]; then return; fi
+#	echo "codebuild -b $from_branch -s $to_branch"
+#	ssh -t dev "codebuild -b $from_branch -s $to_branch"
 	#codebuild -b $from_branch -s $to_branch
 
+	echo -n "Name your stack. will affect the url: "
+	read stack
+	if [ "${stack}" == "" ]; then
+		echo "no stack name provided"
+		return
+	fi
+	# Create the stack
+	aws cloudformation create-stack \
+		--stack-name "${stack}" \
+		--template-url  https://s3-us-west-2.amazonaws.com/cf-templates-ngpok2mx4h0d-us-west-2/2019014Ucb-ephemeral-instance.yaml \
+		--capabilities CAPABILITY_IAM \
+		--parameters ParameterKey=Code,ParameterValue="${from_branch}" \
+		--profile dev
 }
 
 yq-deploy-api2 () {
@@ -151,3 +164,97 @@ EOF
 }
 
 alias aws-sqs-stats="screen -dm chromium-browser --app=https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2#dashboards:name=Logistics --incognito"
+
+alias aws-cf-list='aws cloudformation list-stacks --query "StackSummaries[*].StackName" --profile dev --no-paginate'
+
+aws-cf-activestacks() {
+
+  #local filters=$(__bma_read_filters $@)
+
+  aws cloudformation list-stacks                      \
+    --stack-status                                    \
+      CREATE_COMPLETE                                 \
+      CREATE_FAILED                                   \
+      CREATE_IN_PROGRESS                              \
+      DELETE_FAILED                                   \
+      DELETE_IN_PROGRESS                              \
+      ROLLBACK_COMPLETE                               \
+      ROLLBACK_FAILED                                 \
+      ROLLBACK_IN_PROGRESS                            \
+      UPDATE_COMPLETE                                 \
+      UPDATE_COMPLETE_CLEANUP_IN_PROGRESS             \
+      UPDATE_IN_PROGRESS                              \
+      UPDATE_ROLLBACK_COMPLETE                        \
+      UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS    \
+      UPDATE_ROLLBACK_FAILED                          \
+      UPDATE_ROLLBACK_IN_PROGRESS                     \
+    --query "StackSummaries[][
+               StackName ,
+               StackStatus,
+               CreationTime,
+               LastUpdatedTime
+             ]"                                       \
+	--profile dev\
+    --output text       |
+  #grep -E -- "$filters" |
+  sort -b -k 3          |
+  column -s$'\t' -t
+}
+
+test-stacks() {
+	stacks | fzf
+}
+
+#alias aws-cf-del='aws cloudformation delete-stack --stack-name qa-log-bs --profile dev'
+_aws-cf-del () {
+	if [ "${1}" == "" ]; then
+		echo "don't know what to delete"
+		return
+	fi
+	aws cloudformation delete-stack --stack-name "${1}" --profile dev
+}
+#alias aws-cf-make=' aws cloudformation create-stack --stack-name qa-log-bs --template-url  https://s3-us-west-2.amazonaws.com/cf-templates-ngpok2mx4h0d-us-west-2/2019014Ucb-ephemeral-instance.yaml --capabilities CAPABILITY_IAM --parameters ParameterKey=Code,ParameterValue=develop --profile dev'
+aws-cf-make-instance () {
+	aws cloudformation create-stack \
+		--stack-name qa-log-bs \
+		--template-url  https://s3-us-west-2.amazonaws.com/cf-templates-ngpok2mx4h0d-us-west-2/2019014Ucb-ephemeral-instance.yaml \
+		--capabilities CAPABILITY_IAM \
+		--parameters ParameterKey=Code,ParameterValue=develop \
+		--profile dev
+}
+
+_aws-ec2-dns () {
+	if [ "${1}" == "" ]; then
+		echo "no stack name provided"
+		return
+	fi
+	# Get the physical id (required to get DNS)
+	echo "Stack Name: '${1}'"
+	PhysID=$(_aws-cf-physID "${stack}")
+	echo "Physical ID: ${PhysID}"
+	if [ "${PhysID}" != "[]" ]; then
+		DnsID=$(_aws-ec2-getDns "${PhysID}")
+		echo "DNS name: ${DnsID}"
+	fi
+}
+
+#alias aws-cf-getPhysId='aws cloudformation describe-stack-resources --stack-name qa-log-bs --profile dev --logical-resource-id EphemeralInstance --query "StackResources[].PhysicalResourceId"'
+_aws-cf-physID () {
+	VAL=$(aws cloudformation describe-stack-resources --stack-name "${1}" --profile dev --logical-resource-id EphemeralInstance --query "StackResources[].PhysicalResourceId[]")
+	VAL=${VAL#*\"}
+	VAL=${VAL%\"*}
+	echo "${VAL}"
+}
+#alias aws-ec2-getDns='aws ec2 describe-instances --instance-ids i-06064efdbc4098781 --query "Reservations[].Instances[].PublicDnsName" --profile dev'
+_aws-ec2-getDns () {
+	VAL=$(aws ec2 describe-instances --instance-ids "${1}" --query "Reservations[].Instances[].PublicDnsName" --profile dev)
+	VAL=${VAL#*\"}
+	VAL=${VAL%\"*}
+	echo "${VAL}"
+}
+_aws-just-test () {
+	testVal="testy-test"
+	resVal=$(_aws-cf-physID "${testVal}")
+	echo "${resVal}"
+}
+
