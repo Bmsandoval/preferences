@@ -172,6 +172,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 export  PATH=$PATH:/usr/local/go/bin:$GOBIN
+export  GOPATH=~/projects/home/go
 
 [ -f ~/.screenlayout/setup.sh ] && source ~/.screenlayout/setup.sh
 wallpapers-change () {

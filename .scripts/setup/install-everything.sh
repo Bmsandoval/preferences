@@ -30,9 +30,22 @@ package-installed () {
 #git pull
 #git merge master
 
+
+###### VIM #########
+# install vim
+#sudo apt install vim
+# install bundler
+#git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+# install plugins
+#vim +PluginInstall +qall
+
+
+
 ###### JUST FOLLOW THEIR GUIDE  ######
 # insync (google drive)
 # with i3 I found it easier to configure with the headless
+#sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
+# or sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys ACCAF35C
 
 ###### AUTOJUMP ######
 # only need the apt-install, rest should be in git preferences
@@ -55,13 +68,17 @@ package-installed fzf
 if [ "$?" == "1" ]; then
 	cd ~/applications
 	git clone git@github.com:junegunn/fzf.git
-	cd -
 	cd fzf
 	./install
 	cd -
 fi
 
 ###### ALBERT ######
+wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_18.04/Release.key -O Release.key
+sudo apt-key add - < Release.key
+sudo apt-get update
+
+
 #wget -nv -O Release.key  https://build.opensuse.org/projects/home:manuelschneid3r/public_key
 #sudo apt-key add - < Release.key
 #sudo sh -c "echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_16.04/ /' > /etc/apt/sources.list.d/home:manuelschneid3r.list"
@@ -99,21 +116,24 @@ fi
 # google golang
 echo "checking go"
 package-installed "go" 
+if [ ! -d ~/projects/home/go ]; then
+	mkdir -p ~/projects/home/go
+fi
 if [ "$?" == "1" ]; then
 	cd ~/Downloads
 	wget -c https://storage.googleapis.com/golang/go1.7.3.linux-amd64.tar.gz
 	sudo tar -C /usr/local -xvzf go1.7.3.linux-amd64.tar.gz
 fi
 
-# google golang
-echo "checking sublime"
-package-installed sublime
-if [ "$?" == "1" ]; then
-	curl -fsSL https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
-	sudo add-apt-repository "deb https://download.sublimetext.com/ apt/stable/"
-	sudo apt update
-	sudo apt install sublime-text
-fi
+# Sublime
+#echo "checking sublime"
+#package-installed sublime
+#if [ "$?" == "1" ]; then
+#   curl -fsSL https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+#	sudo add-apt-repository "deb https://download.sublimetext.com/ apt/stable/"
+#	sudo apt update
+#	sudo apt install sublime-text
+#fi
 
 # i3blocks
 package-installed i3blocks

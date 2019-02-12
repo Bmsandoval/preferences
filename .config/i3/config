@@ -30,10 +30,10 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec kitty
+#bindsym $mod+Return exec kitty
 
 # lock screen
-bindsym $mod+semicolon exec lock-screen.sh
+bindsym $mod+Semicolon exec lock-screen
 
 # kill focused window
 bindsym $mod+Shift+q kill
