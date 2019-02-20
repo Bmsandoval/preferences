@@ -30,10 +30,10 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-#bindsym $mod+Return exec kitty
+bindsym $mod+Return exec i3-sensible-terminal
 
 # lock screen
-bindsym $mod+Semicolon exec lock-screen
+bindsym $mod+semicolon exec lock-screen
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -167,6 +167,7 @@ exec --no-startup-id insync-headless start
 exec --no-startup-id nm-applet # network
 exec --no-startup-id diodon # clipboard
 exec --no-startup-id pasystray # volume
+exec --no-startup-id gstm # ssh tunnels
 
 #exec --no-startup-id hsetroot -center ~/googledrive/wallpapers/spaaace/*
 #exec --no-startup-id watch -n 1200 feh --randomize --bg-fill ~/googledrive/wallpapers/spaaace/*

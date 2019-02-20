@@ -96,6 +96,28 @@ yq-deploy-code () {
 		--capabilities CAPABILITY_IAM \
 		--parameters ParameterKey=Code,ParameterValue="${from_branch}" \
 		--profile dev
+	local physID
+	while true; 
+	do 
+		physID=`_aws-cf-physID "${stack}"`
+	  if [ "${physID}" != "[]"  ] ; then
+		  break # or add more commands to finilize the process
+	  fi
+	  sleep 2; 
+	done
+
+	local dnsAddress
+	while true; 
+	do 
+	  dnsAddress=`_aws-ec2-getDns "${physID}"`
+	  if [ "${dnsAddress}" != ""  ] ; then
+		  break # or add more commands to finilize the process
+	  fi
+	  sleep 2; 
+	done
+
+	echo "Stack: ${stack}"
+	echo "Dns: ${dnsAddress}"
 }
 
 yq-deploy-api2 () {
@@ -198,12 +220,32 @@ aws-cf-activestacks() {
     --output text       |
   #grep -E -- "$filters" |
   sort -b -k 3          |
-  column -s$'\t' -t
+  column -s$'\t' -t | fzf
 }
 
 test-stacks() {
 	stacks | fzf
 }
+
+leela-clone() {
+	git clone git@repo.younique-dev.io:leela
+	cd leela
+	git remote set-url --push origin git@github.com:youniquellc/leela
+	git submodule sync --recursive
+	git submodule update --init --force --remote --recursive
+	git submodule foreach 'git remote set-url --push origin git@github.com:youniquellc/$name'
+	git submodule foreach 'git checkout develop'
+	git submodule foreach 'git pull'
+}
+
+#######################################################################
+#######################################################################
+############                 FOR REFERENCE               #############
+#######################################################################
+#######################################################################
+# https://github.com/bash-my-universe/bash-my-aws/blob/master/lib/stack-functions
+#######################################################################
+#######################################################################
 
 #alias aws-cf-del='aws cloudformation delete-stack --stack-name qa-log-bs --profile dev'
 _aws-cf-del () {
@@ -240,9 +282,10 @@ _aws-ec2-dns () {
 
 #alias aws-cf-getPhysId='aws cloudformation describe-stack-resources --stack-name qa-log-bs --profile dev --logical-resource-id EphemeralInstance --query "StackResources[].PhysicalResourceId"'
 _aws-cf-physID () {
-	VAL=$(aws cloudformation describe-stack-resources --stack-name "${1}" --profile dev --logical-resource-id EphemeralInstance --query "StackResources[].PhysicalResourceId[]")
-	VAL=${VAL#*\"}
-	VAL=${VAL%\"*}
+	#VAL=$(aws cloudformation describe-stack-resources --stack-name "${1}" --profile dev --logical-resource-id EphemeralInstance --query "StackResources[].PhysicalResourceId[]")
+	VAL=$(aws cloudformation describe-stack-resources --stack-name "${1}" --profile dev --logical-resource-id EphemeralInstance --query "StackResources[].PhysicalResourceId[]" --output text)
+	#VAL=${VAL#*\"}
+	#VAL=${VAL%\"*}
 	echo "${VAL}"
 }
 #alias aws-ec2-getDns='aws ec2 describe-instances --instance-ids i-06064efdbc4098781 --query "Reservations[].Instances[].PublicDnsName" --profile dev'
