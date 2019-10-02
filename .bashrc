@@ -140,7 +140,8 @@ disable-bracket-paste
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # autojump
-[ -f /usr/share/autojump/autojump.bash ] && . /usr/share/autojump/autojump.bash
+#[ -f /usr/share/autojump/autojump.bash ] && . /usr/share/autojump/autojump.bash
+[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
 
 # integrate fzf with autojump
 j() {
@@ -149,14 +150,11 @@ j() {
         return
     fi
     local dest_dir=$(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+    #local dest_dir=$(autojump -s |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
    if [[ $dest_dir != '' ]]; then
       cd "$dest_dir"
    fi
 }
-
-#gk() {
-#	guake -n " " -e "$1" --show
-#}
 
 #NGROK_INSTALL_PATH=~/applications/ngrok
 #export PATH=$PATH:$NGROK_INSTALL_PATH
@@ -172,10 +170,50 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 export  PATH=$PATH:/usr/local/go/bin:$GOBIN
-export  GOPATH=~/projects/home/go
+export GOROOT=/usr/local/opt/go/libexec
+export  PATH=$PATH:$GOROOT/bin
+export  GOPATH=~/projects/go
+export  PATH=$PATH:$GOPATH/bin
 
-[ -f ~/.screenlayout/setup.sh ] && source ~/.screenlayout/setup.sh
+#[ -f ~/.screenlayout/setup.sh ] && source ~/.screenlayout/setup.sh
 wallpapers-change () {
 	feh --randomize --bg-fill $HOME/googledrive/wallpapers/active_wallpapers
 }
-wallpapers-change
+
+# Do machine-specific stuff
+# https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     wallpapers-change;;
+    Darwin*)    
+		# berw install gnu-sed
+		alias sed="gsed"
+		;;
+	CYGWIN*)    machine=Cygwin;;
+	MINGW*)     machine=MinGw;;
+    *)          echo "unknown machine: ${unameOut}";;
+esac
+
+alias bashbase="vim ~/.bashrc"
+alias bashsrc=". ~/.bashrc"
+
+. <(medic completions)
+
+function vaultenv {
+  env=$1
+  if [[ "$env" == "prod" ]]
+  then
+    export VAULT_ENV=$env
+    export VAULT_TOKEN=""
+    export VAULT_ADDR="http://vault.ops.medbridge.io"
+  elif [[ "$env" == "staging" ]]
+  then
+    export VAULT_ENV=$env
+    export VAULT_TOKEN=""
+    export VAULT_ADDR="http://vault.staging.medbridgeeducation.com"
+  fi
+ 
+  echo "Vault env: $VAULT_ENV"
+  echo "VAULT_TOKEN: $VAULT_TOKEN"
+  echo "VAULT_ADDR: $VAULT_ADDR"
+}

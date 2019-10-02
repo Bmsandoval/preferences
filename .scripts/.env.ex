@@ -1,1 +1,1 @@
-SCRIPT_LOCATIONS=("general" "younique" "setup")
+SCRIPT_LOCATIONS=("general" "setup")

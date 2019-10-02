@@ -3,6 +3,7 @@
 # Get current directory
 SCRIPT_ENTRY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
+alias bashentry="vim ~/.scripts/.script_entry"
 
 bash-src-envs () {
 	# source local env file
