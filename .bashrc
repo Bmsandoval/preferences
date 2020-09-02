@@ -196,24 +196,3 @@ esac
 
 alias bashbase="vim ~/.bashrc"
 alias bashsrc=". ~/.bashrc"
-
-. <(medic completions)
-
-function vaultenv {
-  env=$1
-  if [[ "$env" == "prod" ]]
-  then
-    export VAULT_ENV=$env
-    export VAULT_TOKEN=""
-    export VAULT_ADDR="http://vault.ops.medbridge.io"
-  elif [[ "$env" == "staging" ]]
-  then
-    export VAULT_ENV=$env
-    export VAULT_TOKEN=""
-    export VAULT_ADDR="http://vault.staging.medbridgeeducation.com"
-  fi
- 
-  echo "Vault env: $VAULT_ENV"
-  echo "VAULT_TOKEN: $VAULT_TOKEN"
-  echo "VAULT_ADDR: $VAULT_ADDR"
-}

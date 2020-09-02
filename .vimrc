@@ -18,7 +18,7 @@ set smartcase
 " highlighted searches, but give a way to pause the highlights
 set hlsearch
 " set paste
-nnoremap <esc> :nohlsearch<return><esc>
+"nnoremap <esc> :nohlsearch<return><esc>
 " nnoremap <F2> :set pastetoggle
 
 " remap 'leader' key to ',' instead of '\'
