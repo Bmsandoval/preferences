@@ -1,6 +1,7 @@
 # Blacklist everything
 /*
 # White as needed
+!.gitconfig
 !.gitignore
 !.ideavimrc
 !.profile

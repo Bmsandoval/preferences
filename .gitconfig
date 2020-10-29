@@ -1,0 +1,52 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+	name = sandman
+	email = bmsandoval@gmail.com
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[alias]
+	changelog = log --pretty=format:\" * %s\"
+	changes = log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\" --name-status
+	currentbranch = rev-parse --abbrev-ref HEAD
+	diverges = !bash -c 'diff -u <(git rev-list --first-parent "${1}") <(git rev-list --first-parent "${2:-HEAD}") | sed -ne \"s/^ //p\" | head -1' -
+	filelog = log -u
+	last = diff HEAD^
+	short = log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\"
+	shortnocolor = log --pretty= format:\"%h %cr %cn %s\"
+	submod = submodule
+	uncommit = reset --soft HEAD^
+	undo-commit = !git uncommit
+	unstage = reset HEAD
+	clean-merge = merge --ff-only
+	news = log -p HEAD@{1}..HEAD@{0}
+	restore = checkout HEAD --
+
+	ap = add --patch
+	# commit
+	c = commit
+	cm = commit -m
+	cam = commit -am
+	# diff
+	d = diff
+	dc = diff --cached
+	dis = diff --word-diff=color --word-diff-regex="[^[:space:],]+"
+	dw = diff --color-words
+	fp = "!git fetch && !git pull"
+	# log
+	l = log -18 --color=always --all --topo-order --pretty='format:%Cgreen%h%Creset %s%Cred%d%Creset %C(black bold)(by %an)%Creset'
+	ll = log --color=always --all --topo-order --pretty='format:%Cgreen%h%Creset %s%Cred%d%Creset %C(black bold)(by %an)%Creset'
+	lg = log -12 --color=always --all --graph --topo-order --pretty='format:%Cgreen%h%Creset %s %C(black bold)(by %an)%Creset%C(yellow bold)%d%Creset%n'
+	lgl = log --color=always --all --graph --topo-order --pretty='format:%Cgreen%h%Creset %s %C(black bold)(%cr by %an)%Creset%C(yellow bold)%d%Creset%n'
+	# push
+	p = push
+	po = !git push -u origin $(git currentbranch)
+	# rebase
+	rb = rebase
+	rbm = rebase master
+	rbd = rebase develop
+	# stash
+	s = stash
+	sa = stash apply
+	sl = stash list
+	sp = stash pop
