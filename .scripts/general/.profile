@@ -42,10 +42,10 @@ find_and_replace () {
 	fi
     # List of directories to ignore. Works recursively.
     ignores=(node_modules .git Vendor)
-	# Fancy magic to make ignores work for command line
+    # Fancy magic to make ignores work for command line
     ignores=( "${ignores[@]/%/\/*\" }" )
     ignores=( "${ignores[@]/#/-not -path \"*\/}" )
-	# compile command
+    # compile command
     printf -v cmd_str '%s ' "find . -type f ${ignores[@]} -exec sed -i \"s/$1/$2/g\" {} \;"
     # run command
     eval "$cmd_str"
@@ -289,7 +289,7 @@ alias fix_wifi="echo 'options rtl8188ee swenc=Y ips=N' | sudo tee /etc/modprobe.
 alias list_specs="inxi -Fz"
 
 ## Programs to run on boot
-#[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 bind -x '"\C-p": vim $(fzf);'
 bind -x '"\C-g": git log --pretty=oneline --abbrev-commit | fzf --preview "echo {} | cut -f 1 -d \" \" --reverse | xargs git show --color=always"'
 bind -x '"\C-f": cdg'

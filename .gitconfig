@@ -27,12 +27,14 @@
 	c = commit
 	cm = commit -m
 	cam = commit -am
+	# checkout
+	cb = checkout -b
 	# diff
 	d = diff
 	dc = diff --cached
 	dis = diff --word-diff=color --word-diff-regex="[^[:space:],]+"
 	dw = diff --color-words
-	fp = "!git fetch && !git pull"
+	fp = "!git fetch && git pull"
 	# log
 	l = log -18 --color=always --all --topo-order --pretty='format:%Cgreen%h%Creset %s%Cred%d%Creset %C(black bold)(by %an)%Creset'
 	ll = log --color=always --all --topo-order --pretty='format:%Cgreen%h%Creset %s%Cred%d%Creset %C(black bold)(by %an)%Creset'
@@ -50,3 +52,13 @@
 	sa = stash apply
 	sl = stash list
 	sp = stash pop
+[core]
+	excludesfile = /Users/bryansandoval/.gitignore_global
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = /Users/bryansandoval/.stCommitMsg
