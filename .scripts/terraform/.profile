@@ -19,11 +19,15 @@ Options:
 - apply: 'terraform apply {env}.varfile'
 "
         ;;
+        "init")
+            terraform init
+        ;;
         "plan")
             if [[ "$2" == "" ]]; then
                 echo "Unknown Workspace. Second argument to this command must be something like 'dev' or 'prod'"
             else
                 terraform workspace select "${2}"
+                #result=terraform workspace select "${2}" | grep "doesn't exist."
                 if [[ "$3" == "-c" ]]; then
                     terraform plan -var-file="${2}.tfvars" -no-color | grep -E "(^.*[#~+-] .*|^[[:punct:]]|Plan)"
                 else
@@ -36,7 +40,11 @@ Options:
                 echo "Unknown Workspace. Second argument to this command must be something like 'dev' or 'prod'"
             else
                 terraform workspace select "${2}"
-                terraform apply -var-file="${2}.tfvars"
+                if [[ "$3" == "-y" ]]; then
+                    terraform apply -var-file="${2}.tfvars" -assume-yes
+                else
+                    terraform apply -var-file="${2}.tfvars"
+                fi
             fi
         ;;
         *)

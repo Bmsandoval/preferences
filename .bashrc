@@ -223,3 +223,9 @@ eval "$(pyenv init -)"
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
 [ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# Created by `userpath` on 2021-01-12 22:49:33
+export PATH="$PATH:/Users/bryansandoval/.local/bin"
+export AWS_SDK_LOAD_CONFIG=1
+
+. ~/.ssh/config-ext

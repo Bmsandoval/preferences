@@ -127,6 +127,10 @@ bash_alias () {
     echo "Bash alias $name added to your profile"
 }
 
+rand_string () {
+  openssl rand -base64 12
+}
+
 # Create a function from the last few commands run
 bash_function () {
 	tput sc
@@ -561,6 +565,9 @@ chromium_marquis () {
 		screen -dm chromium-browser --app="${1}"
 	fi
 }
+
+#alias meditate="pmset noidle"
+alias thermlog="pmset -g thermlog"
 
 # Good idea, but I had 3 monitors plugged in and it showed a count of 4 (unused laptop monitor)
 #wallpaper-set-random () {
