@@ -1,5 +1,15 @@
-#!/usr/bin/osascript
+#!/bin/bash
 
+_vpn_connect() {
+  while connection="$1"; shift; do
+    osascript <<EOF
+tell application "Viscosity" to connect "${connection}"
+EOF
+  done
+}
+
+_connected_vpns() {
+  osascript <<EOF
 tell application "Viscosity"
   set output to ""
   set i to 0
@@ -16,3 +26,12 @@ tell application "Viscosity"
   end repeat
   output
 end tell
+EOF
+}
+
+_vpn_disconnect_all() {
+  osascript <<EOF
+tell application "Viscosity" to disconnectall
+EOF
+}
+

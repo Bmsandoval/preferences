@@ -68,3 +68,24 @@ bash-src-scripts () {
 	done
 }
 # only run this selectively (like initial install)
+
+# Helper to edit a given bash file
+alias be="bashedit"
+bashedit () {
+  # select a file
+  location=$(cd $SCRIPTS_LOCATIONS; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
+  if [[ "${location}" != "" ]]; then
+    # strip leading dot that find leaves behind
+    location=${location/./}
+    # append path
+    location="$SCRIPTS_LOCATIONS/$location"
+    # select line
+    lines=$(cat -n "$location" | fzf)
+    # following 3 lines get the line number that cat -n gave us
+    shopt -s extglob
+    read -r lines _ <<< "${lines//[^[:digit:] ]/}"
+    line=${lines##+(0)}
+    # open file at line number
+    vim +"${line}" "$location"
+  fi
+}

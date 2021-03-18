@@ -1,9 +1,5 @@
 #!/bin/bash
 
-STRIDE_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-
-alias bashstride="vim ${STRIDE_SCRIPT_DIR}/.profile"
-
 venv-create() {
   if [[ "${1}" == "" ]]; then
     # Must specify a name for the new venv
@@ -16,123 +12,108 @@ venv-create() {
 }
 
 onboard-bastion() {
-  if [[ "${1}" == "" ]]; then
+  local _username="${1}"
+  local _sshkey="${2}"
+  if [[ "${_username}" == "" ]]; then
     echo "Unknown Username. First argument to this command must be a username of the form '{first_initial}{lastname}'. EX: bsandoval"
-  elif [[ "${2}" == "" ]]; then
+  elif [[ "${_sshkey}" == "" ]]; then
     echo "Unknown SSH Key. Second argument to this command must be an ssh public key in string form"
   elif [[ 0 != `aws sts get-caller-identity >/dev/null; echo $?` ]]; then
     echo "error occured, you are probably not logged in. try 'aws sso login'"
   else
 
-    if [[ `aws s3api list-objects --bucket stride-prod-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${1}.pub"` != "" ]]; then
-      echo "pub key ${1}.pub already exists in prod"
-    elif [[ `aws s3api list-objects --bucket stride-dev-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${1}.pub"` != "" ]]; then
-      echo "pub key ${1}.pub already exists in dev"
+    if [[ `aws s3api list-objects --bucket stride-prod-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"` != "" ]]; then
+      echo "pub key ${_username}.pub already exists in prod"
+    elif [[ `aws s3api list-objects --bucket stride-dev-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"` != "" ]]; then
+      echo "pub key ${_username}.pub already exists in dev"
     else
-      echo "${2}" > "${1}.pub"
-      aws s3api put-object --bucket stride-prod-bastion --key "public-keys/${1}.pub" --body "${1}.pub"
-      aws s3api put-object --bucket stride-dev-bastion --key "public-keys/${1}.pub" --body "${1}.pub"
-      rm "${1}.pub"
+      echo "${_sshkey}" > "${_username}.pub"
+      aws s3api put-object --bucket stride-prod-bastion --key "public-keys/${_username}.pub" --body "${_username}.pub"
+      aws s3api put-object --bucket stride-dev-bastion --key "public-keys/${_username}.pub" --body "${_username}.pub"
+      rm "${_username}.pub"
       echo "validating prod"
-      aws s3api list-objects --bucket stride-prod-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${1}.pub"
+      aws s3api list-objects --bucket stride-prod-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"
       echo "validating dev"
-      aws s3api list-objects --bucket stride-dev-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${1}.pub"
+      aws s3api list-objects --bucket stride-dev-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"
     fi
   fi
 }
 
-# DEPENDS ON: STRIDE_VPN_USERNAME, STRIDE_BASTION_USERNAME
 ssh-bastion() {
-  _environment="${1}"
-  _key=${2}
-  _keys=( `ls -1 ~/.ssh | perl -ne 'print "$1\n" if /'${_environment}'-stride-(.+)-[0-9]+.pem/'` )
-  if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
-    # Must specify a environment to connect to
-    echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
-  elif [[ ! " ${_keys[*]} " =~ " ${_key} " ]]; then
-    printf "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
-  elif [[ $(_vpn_required "${_environment}") == "connecting" ]]; then
-    echo "complete VPN login and try again"
+  local _funcs_req=( "vpn_required" )
+  local _funcs_miss=()
+  for _func in "${_funcs_req[@]}"; do
+    declare -F "${_func}" > /dev/null || _funcs_miss+=("${_func}")
+  done; unset _func
+  local _vars_req=( "STRIDE_BASTION_USERNAME" )
+  local _vars_miss=()
+  for _var in "${_vars_req[@]}"; do
+    [[ ! -z ${!_var+x} ]] || _vars_miss+=("${_var}")
+  done; unset _var
+  if [[ "${#_funcs_miss[@]}" != "0" ]] || [[ "${#_vars_miss[@]}" != "0" ]]; then
+    echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[@]}"
+    echo "missing ${#_vars_miss[@]} external variables(s): ${_vars_miss[@]}"
   else
-    # delete all keys from your ssh keychain (ssh agent only cares about your first 5 keys)
-    ssh-add -D
-    # add the correct key to your keychain
-    ssh-add -K ~/.ssh/${_environment}-stride-${_key}-*.pem
-    # ssh to env-based bastion
-    if [[ "${_environment}" == "prod" ]]; then
-      ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.prod.stridehealth.com"
-    elif [[ "${_environment}" == "dev" ]]; then
-      ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.stridehealth.io"
+    local _environment="${1}"
+    local _key=${2}
+    local _keys=( `ls -1 ~/.ssh | perl -ne 'print "$1\n" if /'${_environment}'-stride-(.+)-[0-9]+.pem/'` )
+    if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
+      # Must specify a environment to connect to
+      echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
+    elif [[ ! " ${_keys[*]} " =~ " ${_key} " ]]; then
+      printf "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
+    elif [[ $(vpn_required "${_environment}") == "connecting" ]]; then
+      echo "complete VPN login and try again"
+    else
+      # delete all keys from your ssh keychain (ssh agent only cares about your first 5 keys)
+      ssh-add -D
+      # add the correct key to your keychain
+      ssh-add -K ~/.ssh/${_environment}-stride-${_key}-*.pem
+      # ssh to env-based bastion
+      if [[ "${_environment}" == "prod" ]]; then
+        ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.prod.stridehealth.com"
+      elif [[ "${_environment}" == "dev" ]]; then
+        ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.stridehealth.io"
+      fi
     fi
   fi
-  # unset all variables
-  unset _environment _key _keys
 }
 
-# DEPENDS ON: STRIDE_VPN_USERNAME, STRIDE_DEV_REDIS_HOST, and STRIDE_PROD_REDIS_HOST
 bust-health-cache() {
   # Verify input parameters
-  _planYear="${1}"
-  _environment="${2}"
+  local _environment="${1}"
+  local _planYear="${2}"
+  local _redisHostVar=$(echo "STRIDE_${_environment}_REDIS_HOST" | tr '[a-z]' '[A-Z]')
   shift && shift
-  if [[ ! "${_planYear}" =~ [0-9]{4} ]]; then
-    echo "Unknown Year. First argument to this command must be the plan year in YYYY format"
-    echo "Ex: ${FUNCNAME[0]} 2021 prod AL"
-  elif [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
-    echo "Unknown Environment. Second argument to this command must be 'dev' or 'prod'"
-    echo "Ex: ${FUNCNAME[0]} 2021 prod AL"
+  if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
+    echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
+    echo "Ex: ${FUNCNAME[0]} prod 2021 AL"
+  elif [[ -z ${!_redisHostVar+x} ]]; then
+    echo "Missing external variable ${_redisHostVar}"
+  elif [[ ! "${_planYear}" =~ [0-9]{4} ]]; then
+    echo "Unknown Year. Second argument to this command must be the plan year in YYYY format"
+    echo "Ex: ${FUNCNAME[0]} prod 2021 AL"
   else
     # enable the proper vpn
-    if [[ $(_vpn_required "${_environment}") == "connecting" ]]; then
+    if [[ $(vpn_required "${_environment}") == "connecting" ]]; then
       echo "complete VPN login and try again"
     else
       echo "running in ${_environment} environment"
-      if [[ "${_environment}" == "dev" ]]; then
-        _strideRedisHost=${STRIDE_DEV_REDIS_HOST}
-      elif [[ "${_environment}" == "prod" ]]; then
-        _strideRedisHost=${STRIDE_PROD_REDIS_HOST}
-      fi
+      local _strideRedisHost="${!_redisHostVar}"
       if [[ "${_strideRedisHost}" != "" ]]; then
+        local _stateCodes=()
         if [[ "${1}" != "all_locations" ]]; then # we can do a list of specific states
-          for _postalCode in "$@"; do
-            if [[ " ${ALL_STATE_CODES[@]} " =~ " ${_postalCode} " ]]; then # make sure it's a real postal code
-              echo "busting ${_postalCode}"
-              # a note on time: pipes are handled concurrently, so time is timing the entire pipe. Time stops and prints after the pipe completes but before followup commands are run
-              redis-cli -h ${_strideRedisHost} --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" | xargs redis-cli -h ${_strideRedisHost} unlink && echo "${_postalCode} complete" &
-            fi
-          done
-        else # or we can just do all the states
-          for _postalCode in "${ALL_STATE_CODES[@]}"; do # go through every US postal code
-            echo "busting ${_postalCode}"
-            redis-cli -h ${_strideRedisHost} --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" | xargs redis-cli -h ${_strideRedisHost} unlink && echo "${_postalCode} complete" &
-          done
+          _stateCodes=( $@ )
+        else
+          _stateCodes=$ALL_STATE_CODES
         fi
-        wait
-        echo "all caches completed"
+        for _postalCode in "${_stateCodes[@]}"; do # go through every US postal code
+          echo "busting ${_postalCode}"
+          redis-cli -h ${_strideRedisHost} --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" | xargs redis-cli -h ${_strideRedisHost} unlink && echo "${_postalCode} complete" &
+        done; unset _postalCode
       fi
+      wait
+      echo "all caches completed"
     fi
-  fi
-  # unset all variables
-  unset _planYear _postalCode _environment _strideRedisHost _fileName
-}
-
-_vpn_required() {
-  if [[ "${1}" != "dev" ]] && [[ "${1}" != "prod" ]]; then
-    # Must specify a environment to connect to
-    echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
-  else
-    _conn="${STRIDE_VPN_USERNAME}@${1}-vpn.stridehealth.io"
-    _active_connections=$(${STRIDE_SCRIPT_DIR}/scripts/_connected_vpns.sh)
-    # If required vpn not active, close all active vpns and connect the one we need
-    if [[ ! " ${_active_connections[@]} " =~ " ${_conn} " ]]; then
-      if [[ "${#_active_connections[@]}" != "0" ]] && [[ "${_active_connections[0]}" != "" ]]; then
-        # Seems like you can only have one active connection at a time
-        ${STRIDE_SCRIPT_DIR}/scripts/_vpn_disconnect_all.sh
-      fi
-      echo "connecting"
-      ${STRIDE_SCRIPT_DIR}/scripts/_vpn_connect.sh "${_conn}"
-    fi
-    # unset all variables
-    unset _conn _active_connections
   fi
 }
