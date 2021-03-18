@@ -44,34 +44,29 @@ onboard-bastion() {
 # DEPENDS ON: STRIDE_VPN_USERNAME, STRIDE_BASTION_USERNAME
 ssh-bastion() {
   _environment="${1}"
-  if [[ "${1}" != "dev" ]] && [[ "${1}" != "prod" ]]; then
+  _key=${2}
+  _keys=( `ls -1 ~/.ssh | perl -ne 'print "$1\n" if /'${_environment}'-stride-(.+)-[0-9]+.pem/'` )
+  if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
     # Must specify a environment to connect to
     echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
+  elif [[ ! " ${_keys[*]} " =~ " ${_key} " ]]; then
+    printf "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
+  elif [[ $(_vpn_required "${_environment}") == "connecting" ]]; then
+    echo "complete VPN login and try again"
   else
-    _key=${2}
-    _keys=`ls -1 ~/.ssh | perl -ne 'print "$1\n" if /'${_environment}'-stride-(.+)-[0-9]+.pem/'`
-    if [[ ! " ${_keys} " =~ " ${2} " ]]; then
-      printf "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
-    else
-      # enable the proper vpn
-      if [[ $(_vpn_required "${_environment}") == "connecting" ]]; then
-        echo "complete VPN login and try again"
-      else
-        # delete all keys from your ssh keychain (ssh agent only cares about your first 5 keys)
-        ssh-add -D
-        # add the correct key to your keychain
-        ssh-add -K ~/.ssh/${_environment}-stride-python-*.pem
-        # ssh to env-based bastion
-        if [[ "${_environment}" == "prod" ]]; then
-          ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.prod.stridehealth.com"
-        elif [[ "${_environment}" == "dev" ]]; then
-          ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.stridehealth.io"
-        fi
-      fi
+    # delete all keys from your ssh keychain (ssh agent only cares about your first 5 keys)
+    ssh-add -D
+    # add the correct key to your keychain
+    ssh-add -K ~/.ssh/${_environment}-stride-${_key}-*.pem
+    # ssh to env-based bastion
+    if [[ "${_environment}" == "prod" ]]; then
+      ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.prod.stridehealth.com"
+    elif [[ "${_environment}" == "dev" ]]; then
+      ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.stridehealth.io"
     fi
   fi
   # unset all variables
-  unset _environment
+  unset _environment _key _keys
 }
 
 # DEPENDS ON: STRIDE_VPN_USERNAME, STRIDE_DEV_REDIS_HOST, and STRIDE_PROD_REDIS_HOST
@@ -87,7 +82,6 @@ bust-health-cache() {
     echo "Unknown Environment. Second argument to this command must be 'dev' or 'prod'"
     echo "Ex: ${FUNCNAME[0]} 2021 prod AL"
   else
-    _allStateCodes=('AL' 'AK' 'AZ' 'AR' 'CA' 'CO' 'CT' 'DE' 'FL' 'GA' 'HI' 'ID' 'IL' 'IN' 'IA' 'KS' 'KY' 'LA' 'ME' 'MD' 'MA' 'MI' 'MN' 'MS' 'MO' 'MT' 'NE' 'NV' 'NH' 'NJ' 'NM' 'NY' 'NC' 'ND' 'OH' 'OK' 'OR' 'PA' 'RI' 'SC' 'SD' 'TN' 'TX' 'UT' 'VT' 'VA' 'WA' 'WV' 'WI' 'WY')
     # enable the proper vpn
     if [[ $(_vpn_required "${_environment}") == "connecting" ]]; then
       echo "complete VPN login and try again"
@@ -101,14 +95,14 @@ bust-health-cache() {
       if [[ "${_strideRedisHost}" != "" ]]; then
         if [[ "${1}" != "all_locations" ]]; then # we can do a list of specific states
           for _postalCode in "$@"; do
-            if [[ " ${_allStateCodes[@]} " =~ " ${_postalCode} " ]]; then # make sure it's a real postal code
+            if [[ " ${ALL_STATE_CODES[@]} " =~ " ${_postalCode} " ]]; then # make sure it's a real postal code
               echo "busting ${_postalCode}"
               # a note on time: pipes are handled concurrently, so time is timing the entire pipe. Time stops and prints after the pipe completes but before followup commands are run
               redis-cli -h ${_strideRedisHost} --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" | xargs redis-cli -h ${_strideRedisHost} unlink && echo "${_postalCode} complete" &
             fi
           done
         else # or we can just do all the states
-          for _postalCode in "${_allStateCodes[@]}"; do # go through every US postal code
+          for _postalCode in "${ALL_STATE_CODES[@]}"; do # go through every US postal code
             echo "busting ${_postalCode}"
             redis-cli -h ${_strideRedisHost} --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" | xargs redis-cli -h ${_strideRedisHost} unlink && echo "${_postalCode} complete" &
           done
