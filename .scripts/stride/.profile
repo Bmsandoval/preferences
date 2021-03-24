@@ -116,4 +116,14 @@ bust-health-cache() {
       echo "all caches completed"
     fi
   fi
-}
+} 2>/dev/null
+
+vericred-plan-data-pull() {
+  for _postalCode in "${ALL_STATE_CODES[@]}"; do # go through every US postal code
+    # EXAMPLE FILE KEY -- production/plans/stride_health/csv/individual/AK/2021/plans.csv
+    local _fileKey="production/plans/stride_health/csv/individual/${_postalCode}/$(date +%Y)/plans.csv"
+    local _outFile="vericred/plans/`echo ${_postalCode} | tr '[A-Z]' '[a-z]'`_plans.csv"
+    aws s3api get-object --profile vericred --bucket vericred-emr-workers --key ${_fileKey} ${_outFile} &
+  done; unset _postalCode
+  wait
+} 2>/dev/null
