@@ -1,2 +1,0 @@
-COMMON_BRANCHES=("origin" "master" "develop")
-DEPLOYABLE_BRANCHES=("deployment/qa deployment/qa-2 team/logistics-1 team/logistics-2")

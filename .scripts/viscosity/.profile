@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# internal scripts live in their own file within this directory
+eval source "$(_get-path-to-current-script)/.internal.profile"
+
 vpn_required() {
   local _environment="${1}"
   if [[ "${1}" != "dev" ]] && [[ "${1}" != "prod" ]]; then
@@ -19,5 +22,3 @@ vpn_required() {
     fi
   fi
 }
-
-source "$VISC_SCRIPT_DIR/.internal.profile"

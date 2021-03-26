@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# internal scripts live in their own file within this directory
+eval source "$(_get-path-to-current-script)/.internal.profile"
+
 net_up_local () {
   local _pkgs_req=( "ip" "fping" )
   local _pkgs_miss=()
@@ -55,5 +58,3 @@ net_test_hosts () {
 net_test_speed () {
 	speedtest-cli | perl -ne 'print "$1$2\n" if /(Upload|Download)([^\n]+)/'
 }
-
-source "$NET_SCRIPT_DIR/.internal.profile"

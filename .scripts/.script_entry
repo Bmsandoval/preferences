@@ -1,91 +1,63 @@
 #!/bin/bash
 
-# Get current directory
-SCRIPT_ENTRY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+# Purpose: Used in scripts to get the directory in which the calling script lives
+# Usage:
+# -- In 'source' command: eval source "$(_get-path-to-current-script)/.internal.profile"
+# -- In var assignment: eval _scriptDir=`_get-path-to-current-script`
+# -- In local var assignment: eval local _scriptDir=`_get-path-to-current-script`
+# -- Optionally you can bypass this function: _scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+_get-path-to-current-script () {
+  echo "\$( cd \"\$( dirname \"\${BASH_SOURCE[0]}\" )\" >/dev/null && pwd )"
+}
 
-alias bashentry="vim ~/.scripts/.script_entry"
 
-bash-src-envs () {
-	# source local env file
-	if [ ! -f "$SCRIPT_ENTRY_DIR/.env" ]; then
-		if [ -f "$SCRIPT_ENTRY_DIR/.env.ex" ]; then
-			cp "$SCRIPT_ENTRY_DIR/.env.ex" "$SCRIPT_ENTRY_DIR/.env"
-		else
-			touch "$SCRIPT_ENTRY_DIR/.env"
-		fi
+# Purpose: Load env file from specified directory.
+#   If env file doesn't exist, copy from the env.ex
+#   If env.ex doesn't exist, touch a blank env
+_bash-src-env () {
+  # Function requires a directory to run against
+  local _dir="${1}"
+  # create an env file if it doesn't exist by either copying the .env.ex or touching a blank one
+	if [ ! -f "$_dir/.env" ]; then
+		[ -f "$_dir/.env.ex" ] && cp "$dir/.env.ex" "$_dir/.env" || touch "$_dir/.env"
 	fi
-	set -a
-		source "$SCRIPT_ENTRY_DIR/.env"
-	set +a
-
-	# source env files from selected workspaces
-	for location in ${SCRIPT_LOCATIONS[*]}; do
-		dir="$SCRIPT_ENTRY_DIR/$location"
-		## create an env file if it doesn't exist
-		if [ ! -f "$dir/.env" ]; then
-			if [ -f "$dir/.env.ex" ]; then
-				cp "$dir/.env.ex" "$dir/.env"
-			else
-				touch "$dir/.env"
-			fi
-		fi
-		# Source the env . will fail if doesn't exist
-		set -a
-			source "$dir/.env"
-		set +a
-	done
+  # Source the env . will fail if doesn't exist. We mitigated this with the statements above
+	set -a; source "$_dir/.env"; set +a
 }
-# source these on startup
-bash-src-envs
 
+
+# Purpose: Load the .profile for each of the workspaces specified in the current directorie's env file
 bash-src-profiles () {
-	# go through all sub script directories. Listed in env.
-	# NOTE - only add directories to env that you want access to on this machine.
+  eval local _scriptDir=`_get-path-to-current-script`
+  # Load this directorie's env file
+  _bash-src-env $_scriptDir
 	for location in ${SCRIPT_LOCATIONS[*]}; do
-		dir="$SCRIPT_ENTRY_DIR/$location"
-		# Source the profile, saved in repo
-		if [ ! -f "$dir/.profile" ]; then
-			touch "$dir/.profile"
-		fi
-		set -a
-			source "$dir/.profile"
-		set +a
-
-		#export PATH="$dir:${PATH}"
+		local _dir="${_scriptDir}/${location}"
+    # Load the env for specified location
+    _bash-src-env $_dir
+    # Source the profile for specified location
+    [ -f "$_dir/.profile" ] && set -a; source "$_dir/.profile"; set +a
 	done
-}
-# source these on startup
-bash-src-profiles
+}; bash-src-profiles # run this script on startup
 
 
-bash-src-scripts () {
-	for location in ${SCRIPT_LOCATIONS[*]}; do
-		dir="$SCRIPT_ENTRY_DIR/$location"
-
-		# Look for files in location that end with .sh, add link them to user space
-		find "$dir" -iname '*.sh' -print0 \
-			| xargs --null -I{} sh -c 'sudo ln -f {} /usr/local/bin/$(basename {} .sh)'
-	done
-}
-# only run this selectively (like initial install)
-
-# Helper to edit a given bash file
+# Purpose: Helper function to fuzzy search script files and open them at a specific line using Vim
 alias be="bashedit"
 bashedit () {
+  eval local _scriptDir=`_get-path-to-current-script`
   # select a file
-  location=$(cd $SCRIPTS_LOCATIONS; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
+  location=$(cd $_scriptDir; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
   if [[ "${location}" != "" ]]; then
-    # strip leading dot that find leaves behind
-    location=${location/./}
-    # append path
-    location="$SCRIPTS_LOCATIONS/$location"
-    # select line
-    lines=$(cat -n "$location" | fzf)
-    # following 3 lines get the line number that cat -n gave us
-    shopt -s extglob
-    read -r lines _ <<< "${lines//[^[:digit:] ]/}"
-    line=${lines##+(0)}
-    # open file at line number
-    vim +"${line}" "$location"
+    # strip leading dot that find leaves behind and prepend file directory
+    location="${_scriptDir}/${location/./}"
+    # select line a specific line
+    local _line=$(cat -n "$location" | fzf)
+    if [[ "${_line}" != "" ]]; then
+      # get the line number and open the file there
+      vim +"$(echo _line | perl -ne 'print "$1" if /^[^0-9]+([0-9]+).+$/')" "${location}"
+    else
+      # don't FORCE the user to select a line number
+      vim "${location}"
+    fi
   fi
 }
