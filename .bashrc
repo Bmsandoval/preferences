@@ -232,5 +232,3 @@ export NVM_DIR="$HOME/.nvm"
 # Created by `userpath` on 2021-01-12 22:49:33
 export PATH="$PATH:/Users/bryansandoval/.local/bin"
 export AWS_SDK_LOAD_CONFIG=1
-
-. ~/.ssh/config-ext
