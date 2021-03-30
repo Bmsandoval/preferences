@@ -182,7 +182,7 @@ export  PATH=$PATH:$GOPATH/bin
 
 # Do machine-specific stuff
 # https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
-HOMEDIR=`eval _homedir="~" && echo "${_homedir}/"` && unset _homedir
+HOMEDIR=`eval _homedir="~" && echo "${_homedir}"` && unset _homedir
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     BASHBASE="${HOMEDIR}/.profile";;
