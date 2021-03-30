@@ -139,10 +139,6 @@ disable-bracket-paste
 # fzf
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash || echo "fzf not installed"
 
-# autojump
-#[ -f /usr/share/autojump/autojump.bash ] && . /usr/share/autojump/autojump.bash
-[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh || echo "autojump not installed"
-
 # integrate fzf with autojump
 j() {
     if [[ "$#" -ne 0 ]]; then
@@ -190,6 +186,7 @@ case "${unameOut}" in
 		# berw install gnu-sed
 		alias sed="gsed"
 		BASHBASE="${HOMEDIR}/.bash_profile"
+    [ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh || echo "autojump not installed"
 		;;
 	CYGWIN*)    machine=Cygwin;;
 	MINGW*)     machine=MinGw;;
