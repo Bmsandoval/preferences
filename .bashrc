@@ -197,7 +197,7 @@ case "${unameOut}" in
 esac
 
 alias bashbase="vim ~/.bashrc"
-bashsrc () {
+function bashsrc {
   . "${BASHBASE}"
 }
 #alias bashsrc=". ~/.bash_profile"
