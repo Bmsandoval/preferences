@@ -176,18 +176,20 @@ export  GOPATH=~/projects/go
 export  PATH=$PATH:$GOPATH/bin
 
 #[ -f ~/.screenlayout/setup.sh ] && source ~/.screenlayout/setup.sh
-wallpapers-change () {
-	feh --randomize --bg-fill $HOME/googledrive/wallpapers/active_wallpapers
-}
+#wallpapers-change () {
+#	feh --randomize --bg-fill $HOME/googledrive/wallpapers/active_wallpapers
+#}
 
 # Do machine-specific stuff
 # https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
+HOMEDIR=`eval _homedir="~" && echo "${_homedir}/"` && unset _homedir
 unameOut="$(uname -s)"
 case "${unameOut}" in
-    Linux*)     wallpapers-change;;
+    Linux*)     BASHBASE="${HOMEDIR}/.profile";;
     Darwin*)    
 		# berw install gnu-sed
 		alias sed="gsed"
+		BASHBASE="${HOMEDIR}/.bash_profile"
 		;;
 	CYGWIN*)    machine=Cygwin;;
 	MINGW*)     machine=MinGw;;
@@ -195,7 +197,10 @@ case "${unameOut}" in
 esac
 
 alias bashbase="vim ~/.bashrc"
-alias bashsrc=". ~/.bash_profile"
+bashsrc () {
+  . "${BASHBASE}"
+}
+#alias bashsrc=". ~/.bash_profile"
 
 # Set CLICOLOR if you want Ansi Colors in iTerm2
 export CLICOLOR=1
