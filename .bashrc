@@ -137,11 +137,11 @@ alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
 
 # fzf
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash || echo "fzf not installed"
 
 # autojump
 #[ -f /usr/share/autojump/autojump.bash ] && . /usr/share/autojump/autojump.bash
-[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
+[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh || echo "autojump not installed"
 
 # integrate fzf with autojump
 j() {
@@ -217,7 +217,7 @@ export PATH="$PATH:$NPM_PACKAGES/bin"
 # Otherwise, fall back to `manpath` so we can inherit from `/etc/manpath`.
 export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
 
-eval "$(pyenv init -)"
+hash pyenv 2>/dev/null && eval "$(pyenv init -)"
 
 # Setup nvm
 export NVM_DIR="$HOME/.nvm"

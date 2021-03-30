@@ -6,6 +6,11 @@
 #   Uses regex to validate that we've received a valid ssh public key. If invalid, shows beginning and end of key
 #   Validates provided username doesn't already exist on the box. Prevents deletion of similarly named employee's keys
 onboard-bastion() {
+  # Ensure functional dependencies exist
+  local _funcs_req=( "_get_user_input_discreet" ); local _funcs_miss=()
+  for _func in "${_funcs_req[@]}"; do declare -F "${_func}" > /dev/null || _funcs_miss+=("${_func}"); done; unset _func
+  if [[ "${#_funcs_miss[@]}" != "0" ]]; then echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[@]}"; (exit 1); return; fi
+
   local _username="${1}"
   # Verify logged in. Already gives a readable error if logged out so don't need a warning
   if [[ 0 == `aws sts get-caller-identity >/dev/null; echo $?` ]]; then
@@ -13,15 +18,25 @@ onboard-bastion() {
       echo "Unknown Username. First argument to this command must be a username of the form '{first_initial}{lastname}'. EX: bsandoval"
     else
       # discreetly get the ssh public key. Feels unnecessary, but means that the key is gone for good when this command ends
-      stty -echo; trap 'stty echo' EXIT;
-      printf "SSH Public Key: "; read _capturedSshKey; printf "\n"
-      stty echo; trap - EXIT;
-      # validate ssh key
-      local _sshPubKey=$(echo $_capturedSshKey | perl -ne 'print "$1$2" if /^(ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)([0-9A-Za-z+\/]+)[=]{0,3}(?: .*)?$/')
-      if [[ "${_sshPubKey}" == "" ]]; then
-        (( ${#_capturedSshKey} > 15 )) && _capturedSshKey="${_capturedSshKey:0:8}...${_capturedSshKey:$(( ${#_capturedSshKey} - 8 ))}"
-        echo "Invalid SSH Pub Key. Recieved: ${_capturedSshKey}"; unset _capturedSshKey
-      elif [[ `aws s3api list-objects --bucket stride-prod-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"` != "" ]]; then
+      while
+        _get_user_input_discreet "SSH Public Key" && _capturedSshKey=${_user_input}
+        if [ $? != 0 ]; then
+          (exit 1)
+          return
+        else
+          local _sshPubKey=$(echo $_capturedSshKey | perl -ne 'print "$1$2" if /^(ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)([0-9A-Za-z+\/]+[=]{0,3})(?: .*)?$/')
+          if [[ "${_sshPubKey}" == "" ]]; then
+            (( ${#_capturedSshKey} > 15 )) && _capturedSshKey="${_capturedSshKey:0:8}...${_capturedSshKey:$(( ${#_capturedSshKey} - 8 ))}"
+            echo "Invalid SSH Pub Key. Recieved: ${_capturedSshKey}"; unset _capturedSshKey
+            true
+          else
+            false
+          fi
+        fi
+      do
+        :
+      done
+      if [[ `aws s3api list-objects --bucket stride-prod-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"` != "" ]]; then
         # don't overwrite existing ssh keys
         echo "pub key ${_username}.pub already exists in prod"
       elif [[ `aws s3api list-objects --bucket stride-dev-bastion --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub"` != "" ]]; then

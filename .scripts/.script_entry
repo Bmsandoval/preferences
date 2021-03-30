@@ -39,25 +39,3 @@ bash-src-profiles () {
     [ -f "$_dir/.profile" ] && set -a; source "$_dir/.profile"; set +a
 	done
 }; bash-src-profiles # run this script on startup
-
-
-# Purpose: Helper function to fuzzy search script files and open them at a specific line using Vim
-alias be="bashedit"
-bashedit () {
-  eval local _scriptDir=`_get-path-to-current-script`
-  # select a file
-  location=$(cd $_scriptDir; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
-  if [[ "${location}" != "" ]]; then
-    # strip leading dot that find leaves behind and prepend file directory
-    location="${_scriptDir}/${location/./}"
-    # select line a specific line
-    local _line=$(cat -n "$location" | fzf)
-    if [[ "${_line}" != "" ]]; then
-      # get the line number and open the file there
-      vim +"$(echo _line | perl -ne 'print "$1" if /^[^0-9]+([0-9]+).+$/')" "${location}"
-    else
-      # don't FORCE the user to select a line number
-      vim "${location}"
-    fi
-  fi
-}

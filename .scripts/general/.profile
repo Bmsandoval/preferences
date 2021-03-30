@@ -5,6 +5,26 @@ function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
 }
 
+_get_user_input() {
+  _user_input=""
+  trap "echo '' && echo 'received interrupt' && (exit 1); return" SIGINT;
+  while [ -z "${_user_input}" ]; do
+    printf "${1}: "; read _user_input; printf "\n"
+  done
+  trap - SIGINT;
+}
+
+_get_user_input_discreet() {
+  stty -echo
+  _user_input=""
+  trap "stty echo && echo '' && echo 'received interrupt' && (exit 1); return" SIGINT;
+  while [ -z "${_user_input}" ]; do
+    printf "${1}: "; read _user_input; printf "\n"
+  done
+  trap - SIGINT;
+  stty echo
+}
+
 ## trap ctrl-c to gracefully handle text ui
 trap ctrl_c INT
 function ctrl_c() {
