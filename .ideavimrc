@@ -1,3 +1,4 @@
 source ~/.vimrc
 nmap <leader><leader>s :action KJumpAction <cr>
 set tabstop=4
+set sneak

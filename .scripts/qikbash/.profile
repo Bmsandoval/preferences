@@ -1,5 +1,7 @@
 #!/bin/bash
 
+eval __QIKBASH_SCRIPT_DIR=`_get-path-to-current-script`
+
 # Purpose: Append a line to your bash profile but DO NOT rerun source command
 _bash_tack () {
   echo "${1}" >> ~/.profile
@@ -38,11 +40,7 @@ bashify() {
       name="${1}"
     else
       while
-        _get_user_input "Name your bash ${bash_type}" && name=_user_input
-        if [ $? != 0 ]; then
-          (exit 1)
-          return
-        fi
+        _get_user_input "Name your bash ${bash_type}" && name=_user_input || return 1
         _bash_has_cmd "${name}"
       do
         :
@@ -73,12 +71,11 @@ bashify() {
 # Purpose: Helper function to fuzzy search script files and open them at a specific line using Vim
 alias be="bashedit"
 bashedit () {
-  eval local _scriptDir=`_get-path-to-current-script`
   # select a file
-  location=$(cd $_scriptDir; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
+  location=$(cd $__QIKBASH_SCRIPT_DIR; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
   if [[ "${location}" != "" ]]; then
     # strip leading dot that find leaves behind and prepend file directory
-    location="${_scriptDir}/${location/./}"
+    location="${__QIKBASH_SCRIPT_DIR}/${location/./}"
     # select line a specific line
     local _line=$(cat -n "$location" | fzf)
     if [[ "${_line}" != "" ]]; then

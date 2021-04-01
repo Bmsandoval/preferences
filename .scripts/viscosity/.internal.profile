@@ -1,14 +1,16 @@
 #!/bin/bash
 
-_vpn_connect() {
-  while connection="$1"; shift; do
-    osascript <<EOF
-tell application "Viscosity" to connect "${connection}"
+function _vpn_connect {
+# Purpose: Try to connect to a Viscosity-maintained VPN
+
+  osascript <<EOF
+tell application "Viscosity" to connect "${1}"
 EOF
-  done
 }
 
-_connected_vpns() {
+function _connected_vpns {
+# Purpose: View all currently connected VPNs as maintained by Viscosity
+
   osascript <<EOF
 tell application "Viscosity"
   set output to ""
@@ -29,7 +31,9 @@ end tell
 EOF
 }
 
-_vpn_disconnect_all() {
+function _vpn_disconnect_all {
+# Purpose: Disconnect from all VPNs maintained by Viscosity
+
   osascript <<EOF
 tell application "Viscosity" to disconnectall
 EOF

@@ -5,6 +5,8 @@ function pslisten {
 	echo `lsof -n -i4TCP:$1 | grep LISTEN`
 }
 
+
+# Purpose: Used to get user input. Input will be visible in scrollback but not in bash history
 _get_user_input() {
   _user_input=""
   trap "echo '' && echo 'received interrupt' && (exit 1); return" SIGINT;
@@ -14,6 +16,8 @@ _get_user_input() {
   trap - SIGINT;
 }
 
+
+# Purpose: Used to get user input while hiding the input from both scrollback and bash history
 _get_user_input_discreet() {
   stty -echo
   _user_input=""

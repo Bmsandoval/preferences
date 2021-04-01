@@ -1,17 +1,34 @@
 #!/bin/bash
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash || echo "fzf not installed"
+
+alias f="fzf"
+
 bind -x '"\C-p": vim $(fzf);'
 bind -x '"\C-g": git log --pretty=oneline --abbrev-commit | fzf --preview "echo {} | cut -f 1 -d \" \" --reverse | xargs git show --color=always"'
 bind -x '"\C-f": cdg'
 bind -x '"\C-\M-;": lock-screen'
 ## commonly used command, let's give it a few shortcuts
 #bind -x '"\C-b": find-command'
+
 alias ff="find_func"
 #alias find-command="compgen -A function -abck | fzf --preview 'man -k . | grep ^{}'"
 #alias find-command="compgen -A function -abck | fzf --preview \"cat $(readlink -f $(type {} | cut -f 3 -d \' \'))\""
 find_func () {
 	$(compgen -A function -abck | fzf --preview "cat \$(readlink -f \$(type {} | cut -f 3 -d ' '))")
+}
+
+# integrate fzf with autojump
+j() {
+    if [[ "$#" -ne 0 ]]; then
+        cd $(autojump $@)
+        return
+    fi
+    local dest_dir=$(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+    #local dest_dir=$(autojump -s |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+   if [[ $dest_dir != '' ]]; then
+      cd "$dest_dir"
+   fi
 }
 
 note_find () {
@@ -21,6 +38,7 @@ note_find () {
 alias ne="note_edit"
 note_edit () {
   location=$(cd $NOTES_LOCATIONS; find . -type f | fzf --preview="cat {}" --preview-window=right:60%:wrap --multi --reverse)
+  echo "${location}"
   # strip leading dot that find leaves behind
   location=${location/./}
   # append path
@@ -42,7 +60,6 @@ note_new () {
 
 
 #bind -x '"\C-n": cdn'
-alias f="fzf"
 # file previews
 export FZF_CTRL_T_OPTS="--preview 'cat {} | head -200'"
 #export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"

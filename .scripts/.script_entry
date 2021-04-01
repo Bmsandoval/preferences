@@ -1,20 +1,26 @@
 #!/bin/bash
 
+function _get-path-to-current-script {
 # Purpose: Used in scripts to get the directory in which the calling script lives
 # Usage:
 # -- In 'source' command: eval source "$(_get-path-to-current-script)/.internal.profile"
 # -- In var assignment: eval _scriptDir=`_get-path-to-current-script`
 # -- In local var assignment: eval local _scriptDir=`_get-path-to-current-script`
 # -- Optionally you can bypass this function: _scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-_get-path-to-current-script () {
+# WARNING:
+#   If it’s run when the script is initially sourced, then it knows where the script is because it’s considering the
+#   path given when you are sourcing the script. However if it’s used in a function that you are going to arbitrarily
+#   call later long after sourcing it, it instead gets the directory you are in when you are calling the script
+#   i.e. keep in mind whether this is used in more of a “constructor” context vs being called arbitrarily in a function
   echo "\$( cd \"\$( dirname \"\${BASH_SOURCE[0]}\" )\" >/dev/null && pwd )"
 }
 
 
+function _bash-src-env {
 # Purpose: Load env file from specified directory.
 #   If env file doesn't exist, copy from the env.ex
 #   If env.ex doesn't exist, touch a blank env
-_bash-src-env () {
+
   # Function requires a directory to run against
   local _dir="${1}"
   # create an env file if it doesn't exist by either copying the .env.ex or touching a blank one
@@ -26,8 +32,9 @@ _bash-src-env () {
 }
 
 
+function bash-src-profiles {
 # Purpose: Load the .profile for each of the workspaces specified in the current directorie's env file
-bash-src-profiles () {
+
   eval local _scriptDir=`_get-path-to-current-script`
   # Load this directorie's env file
   _bash-src-env $_scriptDir

@@ -136,22 +136,6 @@ fi
 alias disable-bracket-paste='printf "\e[?2004l"'
 disable-bracket-paste
 
-# fzf
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash || echo "fzf not installed"
-
-# integrate fzf with autojump
-j() {
-    if [[ "$#" -ne 0 ]]; then
-        cd $(autojump $@)
-        return
-    fi
-    local dest_dir=$(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
-    #local dest_dir=$(autojump -s |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
-   if [[ $dest_dir != '' ]]; then
-      cd "$dest_dir"
-   fi
-}
-
 #NGROK_INSTALL_PATH=~/applications/ngrok
 #export PATH=$PATH:$NGROK_INSTALL_PATH
 

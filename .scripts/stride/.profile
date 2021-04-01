@@ -9,7 +9,7 @@ onboard-bastion() {
   # Ensure functional dependencies exist
   local _funcs_req=( "_get_user_input_discreet" ); local _funcs_miss=()
   for _func in "${_funcs_req[@]}"; do declare -F "${_func}" > /dev/null || _funcs_miss+=("${_func}"); done; unset _func
-  if [[ "${#_funcs_miss[@]}" != "0" ]]; then echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[@]}"; (exit 1); return; fi
+  [ "${#_funcs_miss[@]}" != "0" ] && echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[@]}" && return 1
 
   local _username="${1}"
   # Verify logged in. Already gives a readable error if logged out so don't need a warning
@@ -17,21 +17,17 @@ onboard-bastion() {
     if [[ "${_username}" == "" ]]; then
       echo "Unknown Username. First argument to this command must be a username of the form '{first_initial}{lastname}'. EX: bsandoval"
     else
-      # discreetly get the ssh public key. Feels unnecessary, but means that the key is gone for good when this command ends
+      # putting stuff in the conditional of while to make it a do-while
       while
-        _get_user_input_discreet "SSH Public Key" && _capturedSshKey=${_user_input}
-        if [ $? != 0 ]; then
-          (exit 1)
-          return
+        # discreetly get the ssh public key. Feels unnecessary, but means that the key is gone for good when this command ends
+        _get_user_input_discreet "SSH Public Key" && _capturedSshKey=${_user_input} || return 1
+        local _sshPubKey=$(echo $_capturedSshKey | perl -ne 'print "$1$2" if /^(ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)([0-9A-Za-z+\/]+[=]{0,3})(?: .*)?$/')
+        if [[ "${_sshPubKey}" == "" ]]; then
+          (( ${#_capturedSshKey} > 15 )) && _capturedSshKey="${_capturedSshKey:0:8}...${_capturedSshKey:$(( ${#_capturedSshKey} - 8 ))}"
+          echo "Invalid SSH Pub Key. Recieved: ${_capturedSshKey}"; unset _capturedSshKey
+          true # Continue while loop
         else
-          local _sshPubKey=$(echo $_capturedSshKey | perl -ne 'print "$1$2" if /^(ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)([0-9A-Za-z+\/]+[=]{0,3})(?: .*)?$/')
-          if [[ "${_sshPubKey}" == "" ]]; then
-            (( ${#_capturedSshKey} > 15 )) && _capturedSshKey="${_capturedSshKey:0:8}...${_capturedSshKey:$(( ${#_capturedSshKey} - 8 ))}"
-            echo "Invalid SSH Pub Key. Recieved: ${_capturedSshKey}"; unset _capturedSshKey
-            true
-          else
-            false
-          fi
+          false # Break out of while loop
         fi
       do
         :
