@@ -235,3 +235,81 @@ chromium_marquis () {
 
 #alias meditate="pmset noidle"
 alias thermlog="pmset -g thermlog"
+
+
+function thread_unlock {
+# Purpose: Unlock something so someone else can lock it for their use
+  rm -rf "${1}.lock"
+}
+
+
+function thread_lock {
+# Purpose: Lock something for my own use
+  if mkdir "${1}.lock"; then
+    return 0 # return success, have lock
+  else
+    return 1 # return fail, couldn't get lock
+  fi
+}
+
+
+function echo_thread_safe {
+  local _hadLock=false
+  while [ $_hadLock == false ]; do
+    if thread_lock "${2}"; then
+      echo "got a lock!"
+      sh -c "${1}"
+      _hadLock=true
+      thread_unlock "${2}"
+      echo "unlocked!"
+      return 0
+    fi
+  done
+}
+
+
+function echo_thread_not_safe {
+  sh -c "${1}"
+}
+
+
+function thread_safe_example {
+  echo "starting process ${1}"
+  local SLEEP=0
+  local _sleep=$((1 + RANDOM % 3))
+  SLEEP=$((SLEEP+_sleep))
+  sleep $_sleep
+  local OUTPUT='process '"${1}"' slept '"${SLEEP}"' seconds'
+  echo_thread_safe 'echo '"${OUTPUT}"'; echo '"${OUTPUT}"'; echo '"${OUTPUT}"'' "${2}"
+  SLEEP=$((SLEEP+1+_sleep))
+  sleep $((1+_sleep))
+  echo "process ${1} finished after ${SLEEP} seconds"
+}
+
+
+function thread_unsafe_example {
+  echo "starting process ${1}"
+  local SLEEP=0
+  local _sleep=$((1 + RANDOM % 3))
+  SLEEP=$((SLEEP+_sleep))
+  sleep $_sleep
+  local OUTPUT='process '"${1}"' slept '"${SLEEP}"' seconds'
+  echo_thread_not_safe 'echo '"${OUTPUT}"'; echo '"${OUTPUT}"'; echo '"${OUTPUT}"'' "${2}"
+  SLEEP=$((SLEEP+1+_sleep))
+  sleep $((1+_sleep))
+  echo "process ${1} finished after ${SLEEP} seconds"
+}
+
+
+function thread_safe_proofing {
+  for i in {1..10}; do
+    thread_unsafe_example "${i}" &
+  done
+  wait
+
+  local _td=$(date +%s)
+  for i in {11..20}; do
+    thread_safe_example "${i}" "${_td}" &
+  done
+  wait
+} 2>/dev/null
