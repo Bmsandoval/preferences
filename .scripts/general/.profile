@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Load the env for this script
+_bash-src-env "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+
 alias git_logs='git log --oneline --graph'
 alias serve='php artisan serve --port=8089'
 function pslisten {
@@ -313,3 +318,33 @@ function thread_safe_proofing {
   done
   wait
 } 2>/dev/null
+
+
+extract_current_cursor_position () {
+    export $1
+    exec < /dev/tty
+    oldstty=$(stty -g)
+    stty raw -echo min 0
+    echo -en "\033[6n" > /dev/tty
+    IFS=';' read -r -d R -a pos
+    stty $oldstty
+    eval "$1[0]=$((${pos[0]:2} - 2))"
+    eval "$1[1]=$((pos[1] - 1))"
+}
+
+test_cursor_positioning() {
+  local _cursorPos
+  extract_current_cursor_position _cursorPos
+  local _count=0
+  _count=$_count+1; echo "${_cursorPos[0]}" "${_cursorPos[1]}"
+  sleep 1
+  _count=$_count+1; echo "${_cursorPos[0]}" "${_cursorPos[1]}"
+  sleep 1
+  _count=$_count+1; echo "${_cursorPos[0]}" "${_cursorPos[1]}"
+  sleep 1
+  _count=$_count+1; echo "${_cursorPos[0]}" "${_cursorPos[1]}"
+  sleep 1
+  _count=$_count+1; echo "${_cursorPos[0]}" "${_cursorPos[1]}"
+  sleep 1
+  tput cup "$((_cursorPos[0]-_count))" "${_cursorPos[1]}"
+}

@@ -1,3 +1,6 @@
+# Load the env for this script
+_bash-src-env "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 alias tf="terrafly"
 terrafly () {
     # if no command given force help page

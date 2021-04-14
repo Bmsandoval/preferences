@@ -1,31 +1,13 @@
 #!/bin/bash
 
-eval __QIKBASH_SCRIPT_DIR=`_get-path-to-current-script`
-
-# Purpose: Append a line to your bash profile but DO NOT rerun source command
-_bash_tack () {
-  echo "${1}" >> ~/.profile
-}
+# Load the env for this script
+__QIKBASH_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+_bash-src-env "${__QIKBASH_SCRIPT_DIR}"
 
 
-# Purpose: Get a single command from a position in the bash history and trim everything before the actual command
-_clean_history_command () {
-  # Example of line from history Output:
-  # 1309  01/06/18 12:46:07 bash-src
-	# strip line number
-	echo $(history | tail -n$(($1+1)) | head -n1 | perl -pe 's|^\s*[0-9]+\s+[0-9]{2}/[0-9]{2}/[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\s+(.+)|$1|')
-}
-
-
-# Purpose: Quick wrapper to see if the current bash session has a particular alias, function, or command available
-_bash_has_cmd () {
-  command -v "${1}"
-} > /dev/null
-
-
-# Purpose: Take one or more recently run commands and convert them into a function/alias
 alias bf="bashify"
 bashify() {
+# Purpose: Take one or more recently run commands and convert them into a function/alias
   local history_selections=($(history | fzf -m --tac | sort | perl -ne 's/\s+([0-9]+).*/$1/ && print'))
   # stop if nothing selected
   if [[ "${#history_selections[@]}" != "0" ]]; then
@@ -68,9 +50,9 @@ bashify() {
 }
 
 
-# Purpose: Helper function to fuzzy search script files and open them at a specific line using Vim
 alias be="bashedit"
 bashedit () {
+# Purpose: Helper function to fuzzy search script files and open them at a specific line using Vim
   # select a file
   location=$(cd $__QIKBASH_SCRIPT_DIR; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
   if [[ "${location}" != "" ]]; then
@@ -87,3 +69,32 @@ bashedit () {
     fi
   fi
 }
+
+
+#    ___ _  _ _____ ___ ___ _  _   _   _
+#   |_ _| \| |_   _| __| _ \ \| | /_\ | |
+#    | || .` | | | | _||   / .` |/ _ \| |__
+#   |___|_|\_| |_| |___|_|_\_|\_/_/ \_\____|
+##########################################
+
+_bash_tack () {
+# Purpose: Append a line to your bash profile but DO NOT rerun source command
+  echo "${1}" >> ~/.profile
+}
+
+
+_clean_history_command () {
+# Purpose: Get a single command from a position in the bash history and trim everything before the actual command
+  # Example of line from history Output:
+  # 1309  01/06/18 12:46:07 bash-src
+	# strip line number
+	echo $(history | tail -n$(($1+1)) | head -n1 | perl -pe 's|^\s*[0-9]+\s+[0-9]{2}/[0-9]{2}/[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\s+(.+)|$1|')
+}
+
+
+_bash_has_cmd () {
+# Purpose: Quick wrapper to see if the current bash session has a particular alias, function, or command available
+  command -v "${1}"
+} > /dev/null
+
+

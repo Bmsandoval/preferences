@@ -1,5 +1,9 @@
 # source any bash scripts here
 #export PATH="/home/sandman/.scripts/setup:${PATH}"
+
+# Load the env for this script
+_bash-src-env "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 alias bashmedb="vim ~/.scripts/medb/.profile"
 
 alias kubePodsByName="kubectl get pods --all-namespaces -o=jsonpath='{range .items[*]}{\"\n\"}{.metadata.name}{end}' |sort"

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Load the env for this script
+_bash-src-env "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash || echo "fzf not installed"
 
 alias f="fzf"

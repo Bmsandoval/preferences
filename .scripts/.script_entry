@@ -12,6 +12,7 @@ function _get-path-to-current-script {
 #   path given when you are sourcing the script. However if it’s used in a function that you are going to arbitrarily
 #   call later long after sourcing it, it instead gets the directory you are in when you are calling the script
 #   i.e. keep in mind whether this is used in more of a “constructor” context vs being called arbitrarily in a function
+
   echo "\$( cd \"\$( dirname \"\${BASH_SOURCE[0]}\" )\" >/dev/null && pwd )"
 }
 
@@ -40,8 +41,6 @@ function bash-src-profiles {
   _bash-src-env $_scriptDir
 	for location in ${SCRIPT_LOCATIONS[*]}; do
 		local _dir="${_scriptDir}/${location}"
-    # Load the env for specified location
-    _bash-src-env $_dir
     # Source the profile for specified location
     [ -f "$_dir/.profile" ] && set -a; source "$_dir/.profile"; set +a
 	done
