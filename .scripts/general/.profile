@@ -5,33 +5,38 @@ _bash-src-env "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 
 alias git_logs='git log --oneline --graph'
-alias serve='php artisan serve --port=8089'
-function pslisten {
-	echo `lsof -n -i4TCP:$1 | grep LISTEN`
-}
 
 
-# Purpose: Used to get user input. Input will be visible in scrollback but not in bash history
-_get_user_input() {
-  _user_input=""
+__get_user_input_general() {
+# Purpose: Used to get user input. Input will be visible in scroll history but not in shell history
+#   Will loop until a non-empty input is received, or until an interrupt is sent
+# Returns: User's input, echoed from function. positive exit code if received SIGINT
+  local _user_input
   trap "echo '' && echo 'received interrupt' && (exit 1); return" SIGINT;
   while [ -z "${_user_input}" ]; do
-    printf "${1}: "; read _user_input; printf "\n"
+    # Send to /dev/tty to force output to user allowing this commands output to be captured
+    printf '%s' "${1}" > /dev/tty; read -r _user_input;
   done
   trap - SIGINT;
+  echo "${_user_input}"
 }
 
 
-# Purpose: Used to get user input while hiding the input from both scrollback and bash history
-_get_user_input_discreet() {
-  stty -echo
-  _user_input=""
+__get_user_input_discreet() {
+# Purpose: Used to get user input while hiding the input from both scroll history and shell history
+#   Will loop until a non-empty input is received, or until an interrupt is sent
+# Returns: User's input, echoed from function. positive exit code if received SIGINT
+# Warning: Discreet output is indiscreetly echoed from this function. Capture it or it will be in scroll history
+  local _user_input
   trap "stty echo && echo '' && echo 'received interrupt' && (exit 1); return" SIGINT;
+  stty -echo
   while [ -z "${_user_input}" ]; do
-    printf "${1}: "; read _user_input; printf "\n"
+    # Send to /dev/tty to force output to user allowing this commands output to be captured
+    printf '%s' "${1}" > /dev/tty; read -r _user_input; printf '\n' > /dev/tty;
   done
-  trap - SIGINT;
   stty echo
+  trap - SIGINT;
+  echo "${_user_input}"
 }
 
 ## trap ctrl-c to gracefully handle text ui

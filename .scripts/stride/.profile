@@ -9,7 +9,7 @@ __STRIDE_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd 
 if [ ! -f "$__STRIDE_SCRIPT_DIR/.env" ]; then
   [ -f "$__STRIDE_SCRIPT_DIR/.env.ex" ] && cp "$__STRIDE_SCRIPT_DIR/.env.ex" "$__STRIDE_SCRIPT_DIR/.env" || touch "$__STRIDE_SCRIPT_DIR/.env"
 fi
-set -a; source "$__STRIDE_SCRIPT_DIR/.env"; set +a
+set -a; source "${__STRIDE_SCRIPT_DIR}/.env"; set +a
 
 
 ## Load the VISCOSITY profile
@@ -30,21 +30,32 @@ stride-bastion-onboard() {
 #   Validates provided username doesn't already exist on the box. Prevents deletion of similarly named employee's keys
 
   # Ensure functional dependencies exist
-  local _funcs_req=( "_get_user_input_discreet" ); local _funcs_miss=()
-  for _func in "${_funcs_req[@]}"; do declare -F "${_func}" > /dev/null || _funcs_miss+=("${_func}"); done; unset _func
-  [ "${#_funcs_miss[@]}" != "0" ] && echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[@]}" && return 1
+  local _funcsReq _funcsMiss _username _sshPubKey _backingFile  _capturedSshKey _inputReqStr
+  _funcsReq=( "__get_user_input_discreet" "__mktemp_with_contents" ); _funcsMiss=()
+  for _func in "${_funcsReq[@]}"; do declare -F "${_func}" > /dev/null || _funcsMiss+=("${_func}"); done; unset _func
+  [ "${#_funcsMiss[@]}" != "0" ] && echo "missing ${#_funcsMiss[@]} external function(s): ${_funcsMiss[*]}" && return 1
 
-  local _username="${1}"
+  _username="${1}"
   # Verify logged in. Already gives a readable error if logged out so don't need a warning
-  if [[ 0 == `aws sts get-caller-identity >/dev/null; echo $?` ]]; then
+  if [[ 0 == $(aws sts get-caller-identity >/dev/null; echo $?) ]]; then
     if [[ "${_username}" == "" ]]; then
       echo "Unknown Username. First argument to this command must be a username of the form '{first_initial}{lastname}'. EX: bsandoval"
     else
       # putting stuff in the conditional of while to make it a do-while
       while
         # discreetly get the ssh public key. Feels unnecessary, but means that the key is gone for good when this command ends
-        _get_user_input_discreet "SSH Public Key" && _capturedSshKey=${_user_input} || return 1
-        local _sshPubKey=$(echo $_capturedSshKey | perl -ne 'print "$1$2" if /^(ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)([0-9A-Za-z+\/]+[=]{0,3})(?: .*)?$/')
+
+        _capturedSshKey=$(_get_user_input_discreet "SSH Public Key: ")
+        _sshPubKey=$(echo "${_capturedSshKey}" \
+        | perl -ne \
+            'print "$1$2" if /^('\
+              'ssh-rsa AAAAB3NzaC1yc2'\
+              '|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT'\
+              '|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD'\
+              '|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj'\
+              '|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5'\
+              '|ssh-dss AAAAB3NzaC1kc3'\
+            ')([0-9A-Za-z+\/]+[=]{0,3})(?: .*)?$/')
         if [[ "${_sshPubKey}" == "" ]]; then
           (( ${#_capturedSshKey} > 15 )) && _capturedSshKey="${_capturedSshKey:0:8}...${_capturedSshKey:$(( ${#_capturedSshKey} - 8 ))}"
           echo "Invalid SSH Pub Key. Recieved: ${_capturedSshKey}"; unset _capturedSshKey
@@ -55,7 +66,7 @@ stride-bastion-onboard() {
       do
         :
       done
-      local _backingFile="${_username}-$(date +%s).tmp"
+      _backingFile=$(mktemp)
       echo "validating keys don't already exist"
       for env in "${STRIDE_ENVIRONMENTS[@]}"; do
         aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_backingFile}" &
@@ -63,45 +74,46 @@ stride-bastion-onboard() {
       if [[ -f "${_backingFile}" ]]; then
         echo "pub key ${_username}.pub already exists"
       else
-        rm "${_backingFile}"
-        local _tmpFile="$(date +%s).tmp"
-        echo "${_sshPubKey}" > "${_tmpFile}"
+        local _tempFile
+        _tempFile=$(mktemp | tee >(read -r _n; echo "${_sshPubKey}" > "${_n}"))
         for env in "${STRIDE_ENVIRONMENTS[@]}"; do
-          aws s3api put-object --bucket "stride-${env}-bastion" --key "public-keys/${_username}.pub" --body "${_tmpFile}" &
+          aws s3api put-object --bucket "stride-${env}-bastion" --key "public-keys/${_username}.pub" --body "${_tempFile}" &
         done; wait
         echo "validating keys added"
         for env in "${STRIDE_ENVIRONMENTS[@]}"; do
           aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_backingFile}" &
         done; wait
-        if [[ "`cat ${_backingFile} | wc -l | tr -d '[:space:]'`" != "${#STRIDE_ENVIRONMENTS[@]}" ]]; then
+        if [[ "$( < "${_backingFile}" wc -l \
+        | tr -d '[:space:]')" != "${#STRIDE_ENVIRONMENTS[@]}" ]]
+        then
           echo "something went wrong, user keys not found"
         fi
         # remove the public key from local machine
-        rm -f "${_backingFile}"
-        rm -f "${_tmpFile}"
       fi
     fi
   fi
 } 2> /dev/null
 
 
-function stride-bastion-onboard {
+function stride-bastion-offboard {
 # Purpose: Remove old user's ssh public key from the bastion server's s3 bucket
 #   This command requires you be logged into AWS SSO. Elegant error handling if not logged in
 #   Validates provided username exists on the box before attempting removal
 
-  local _username="${1}"
+  local _username _backingFile
+  _username="${1}"
   # Verify logged in. Already gives a readable error if logged out so don't need a warning
-  if [[ 0 == `aws sts get-caller-identity >/dev/null; echo $?` ]]; then
+  if [[ 0 == $(aws sts get-caller-identity >/dev/null; echo $?) ]]; then
     if [[ "${_username}" == "" ]]; then
       echo "Unknown Username. First argument to this command must be a username of the form '{first_initial}{lastname}'. EX: bsandoval"
       aws s3api list-objects --bucket "stride-prod-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}'
     else
-      local _backingFile="${_username}-$(date +%s).tmp"
+      _backingFile=$(mktemp)
       for env in "${STRIDE_ENVIRONMENTS[@]}"; do
-        aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_backingFile}" &
+        aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' \
+        | grep "/${_username}.pub" >> "${_backingFile}" &
       done; wait
-      if [[ "`cat ${_backingFile} | wc -l | tr -d '[:space:]'`" != "${#STRIDE_ENVIRONMENTS[@]}" ]]; then
+      if [[ "$(cat "${_backingFile}" wc -l | tr -d '[:space:]')" != "${#STRIDE_ENVIRONMENTS[@]}" ]]; then
         echo "user does not exist in bastion"
       else
         rm -f "${_backingFile}"
@@ -110,14 +122,12 @@ function stride-bastion-onboard {
         done; wait
         echo "validating keys removed"
         for env in "${STRIDE_ENVIRONMENTS[@]}"; do
-          aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_backingFile}" &
+          aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' \
+          | grep "/${_username}.pub" >> "${_backingFile}" &
         done; wait
-        if [[ "`cat ${_backingFile} | wc -l | tr -d '[:space:]'`" != "0" ]]; then
+        if [[ "$( < "${_backingFile}" wc -l | tr -d '[:space:]')" != "0" ]]; then
           echo "something went wrong, user keys not found"
         fi
-        # remove the public key from local machine
-        rm -f "${_backingFile}"
-        rm -f "${_tmpFile}"
       fi
     fi
   fi
@@ -129,37 +139,39 @@ stride-bastion-ssh() {
 #   Ensures you are on the right vpn for the bastion that's been requested
 #   If requested key not found locally, lists available keys for environment
 
-  local _funcs_req=( "vpn_required" )
-  local _funcs_miss=()
-  local _vars_req=( "STRIDE_BASTION_USERNAME" )
-  local _vars_miss=()
+  local _funcs_req _funcs_miss _func _vars_req _vars_miss _var _environment _keys _key
+  _funcs_req=( "vpn_required" )
+  _funcs_miss=()
+  _vars_req=( "STRIDE_BASTION_USERNAME" )
+  _vars_miss=()
   for _func in "${_funcs_req[@]}"; do
     declare -F "${_func}" > /dev/null || _funcs_miss+=("${_func}")
-  done; unset _func
+  done;
   for _var in "${_vars_req[@]}"; do
-    [[ ! -z ${!_var+x} ]] || _vars_miss+=("${_var}")
-  done; unset _var
+    [[ -n ${!_var+x} ]] || _vars_miss+=("${_var}")
+  done;
   if [[ "${#_funcs_miss[@]}" != "0" ]] || [[ "${#_vars_miss[@]}" != "0" ]]; then
-    echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[@]}"
-    echo "missing ${#_vars_miss[@]} external variables(s): ${_vars_miss[@]}"
+    echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[*]}"
+    echo "missing ${#_vars_miss[@]} external variables(s): ${_vars_miss[*]}"
   else
-    local _environment="${1}"
-    local _key=${2}
-    local _keys=( `ls -1 ~/.ssh | perl -ne 'print "$1\n" if /'${_environment}'-stride-(.+)-[0-9]+.pem/'` )
+    _environment="${1}"
+    _key=${2}
+    read -ra _keys <<<"$(find ~/.ssh -type f -exec basename \\\{\} \; \
+    | perl -ne 'print "$1\n" if /'"${_environment}"'-stride-(.+)-[0-9]+.pem/')"
     if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
       # Must specify a environment to connect to
       echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
-    elif [[ ! " ${_keys[*]} " =~ " ${_key} " ]]; then
-      printf "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
+    elif [[ ! "${_keys[*]}" =~ (^|[[:space:]])"${_key}"($|[[:space:]]) ]]; then
+      echo -e "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
     elif [[ $(vpn_required "${_environment}") == "connecting" ]]; then
       echo "complete VPN login and try again"
     else
       # delete all keys from your ssh keychain (ssh agent only cares about your first 5 keys)
       ssh-add -D
       # add user's personal ssh key
-      ssh-add -K ~/.ssh/id_rsa
+      ssh-add -K "$HOME/.ssh/id_rsa"
       # add the correct key to your keychain
-      ssh-add -K ~/.ssh/${_environment}-stride-${_key}-*.pem
+      ssh-add -K "$HOME/.ssh/${_environment}-stride-${_key}-*.pem"
       # ssh to env-based bastion
       if [[ "${_environment}" == "prod" ]]; then
         ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.prod.stridehealth.com"
@@ -184,9 +196,10 @@ stride-health-cache-bust() {
 #   If busting more than one state, runs them in parallel
 
   # Verify input parameters
-  local _environment="${1}"
-  local _planYear="${2}"
-  local _redisHostVar=$(echo "STRIDE_${_environment}_REDIS_HOST" | tr '[a-z]' '[A-Z]')
+  local _environment _planYear _redisHostVar _statusPid _pids _strideRedisHost _stateCodes
+  _environment="${1}"
+  _planYear="${2}"
+  _redisHostVar=$(echo "STRIDE_${_environment}_REDIS_HOST" | tr '[:lower:]' '[:upper:]')
   shift && shift
   if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
     echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
@@ -202,23 +215,24 @@ stride-health-cache-bust() {
       echo "complete VPN login and try again"
     else
       echo "running in ${_environment} environment"
-      local _strideRedisHost="${!_redisHostVar}"
-      local _pids=()
+      _strideRedisHost="${!_redisHostVar}"
+      _pids=()
       if [[ "${_strideRedisHost}" != "" ]]; then
-        local _stateCodes=()
+        _stateCodes=()
         if [[ "${1}" != "all_locations" ]]; then # we can do a list of specific states
-          _stateCodes=( $@ )
+          read -ra _stateCodes <<<"${@}"
         else
-          _stateCodes=$ALL_STATE_CODES
+          read -ra _stateCodes <<<"${ALL_STATE_CODES}"
         fi
         for _postalCode in "${_stateCodes[@]}"; do # go through every US postal code
           echo "busting ${_postalCode}"
-          redis-cli -h ${_strideRedisHost} --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" | xargs redis-cli -h ${_strideRedisHost} unlink && echo "${_postalCode} complete" &
+          redis-cli -h "${_strideRedisHost}" --scan --pattern "healthPlanEligible:planYear=${_planYear}:state=${_postalCode}*" \
+          | xargs redis-cli -h "${_strideRedisHost}" unlink && echo "${_postalCode} complete" &
           _pids+=($!)
         done; unset _postalCode
       fi
       while true; do echo '.' && sleep 1; done &
-      local _statusPid=$!
+      _statusPid=$!
       trap "kill ${_statusPid}" SIGINT;
       wait "${_pids[@]}"
       kill $_statusPid
@@ -239,17 +253,19 @@ stride-vericred-pull-plans() {
 #   Vericred sometimes uploads previous year's data late into next year so we can't make assumptions on the year.
 #   Runs all states in parallel
 
-  local _planYear=${1}
-  if [[ "" == "$(echo ${_planYear} | perl -ne 'print if /^[0-9]{4}$/')" ]]; then
+  local _planYear _path _outFile _fileKey
+  _planYear=${1}
+  if [[ "" == "$(echo "${_planYear}" | perl -ne 'print if /^[0-9]{4}$/')" ]]; then
     echo "Unknown or invalid year. First argument to this command must be the plan year to fetch, in YYYY format. Recieved: '${_planYear}'"
   else
-    local _path=`eval "~/vericred/plans"`
+    _path="${HOME}/vericred/plans"
     mkdir -p _path
     echo "pulling ${_planYear} plans for all states"
     for _stateCode in "${ALL_STATE_CODES[@]}"; do # go through every US state code
-      local _fileKey="production/plans/stride_health/csv/individual/${_stateCode}/${_planYear}/plans.csv"
-      local _outFile="${_path}/`echo ${_stateCode} | tr '[A-Z]' '[a-z]'`_plans.csv"
-      aws s3api get-object --profile vericred --bucket vericred-emr-workers --key ${_fileKey} ${_outFile} &
+      _fileKey="production/plans/stride_health/csv/individual/${_stateCode}/${_planYear}/plans.csv"
+      _outFile="${_path}/$(echo "${_stateCode}" \
+      | tr '[:upper:]' '[:lower:]')_plans.csv"
+      aws s3api get-object --profile vericred --bucket vericred-emr-workers --key "${_fileKey}" "${_outFile}" &
     done; unset _stateCode
     wait
   fi
@@ -262,18 +278,20 @@ stride-vericred-pull-providers() {
 #   Avoid unzipping it if most recent data already unzipped
 
   # Find upload date of most recent data uploaded
-  local _vericredFileKey=$(aws s3api list-objects-v2 --profile vericred --bucket vericred-emr-workers --prefix 'production/plans/stride_health/network/' --query 'sort_by(Contents, &LastModified)[-1].Key' --no-paginate --output text)
-  local _vericredFileDate=$(echo "${_vericredFileKey}" | perl -pe 's|.*(\d{4}-\d{2}-\d{2}).zip|$1|g')
+  local _vericredFileKey _vericredFileDate _path _homedir
+  _vericredFileKey=$(aws s3api list-objects-v2 --profile vericred --bucket vericred-emr-workers --prefix 'production/plans/stride_health/network/' --query 'sort_by(Contents, &LastModified)[-1].Key' --no-paginate --output text)
+  _vericredFileDate=$(echo "${_vericredFileKey}" \
+  | perl -pe 's|.*(\d{4}-\d{2}-\d{2}).zip|$1|g')
   echo "Latest file uploaded on ${_vericredFileDate}"
-  local _path=`eval _homedir="~" && echo "${_homedir}/vericred"` && unset _homedir
+  _path="${HOME}/vericred"
   mkdir -p "${_path}"
-  # Uses dated lock file to avoid reunzipping same data
+  # Uses dated lock file to avoid re-unzipping same data
   if [[ ! -f "${_path}/tmp/${_vericredFileDate}.lock" ]]; then
-    # Checks local zip to avoid redownloading same data
+    # Checks local zip to avoid re-downloading same data
     if [[ ! -f "${_path}/network_data_${_vericredFileDate}.zip" ]]; then
       echo "Current Vericred zip doesn't exist locally, pulling down from source."
       rm -f "${_path}/network_data_*.zip"
-      aws s3api get-object --profile vericred --bucket vericred-emr-workers --key $_vericredFileKey ${_path}/network_data_${_vericredFileDate}.zip
+      aws s3api get-object --profile vericred --bucket vericred-emr-workers --key "${_vericredFileKey}" "${_path}/network_data_${_vericredFileDate}.zip"
     fi
     echo "Unzipping local Vericred data"
     rm -rf "${_path}/tmp"

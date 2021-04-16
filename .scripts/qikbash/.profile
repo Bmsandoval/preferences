@@ -7,6 +7,7 @@ _bash-src-env "${__QIKBASH_SCRIPT_DIR}"
 
 alias bf="bashify"
 bashify() {
+  local name
 # Purpose: Take one or more recently run commands and convert them into a function/alias
   local history_selections=($(history | fzf -m --tac | sort | perl -ne 's/\s+([0-9]+).*/$1/ && print'))
   # stop if nothing selected
@@ -17,12 +18,14 @@ bashify() {
     [ "${#history_selections[@]}" == "1" ] && bash_type="alias" || bash_type="function"
 
     # get/set command name
-    local name=""
+    name=""
     if [ ! -z "${1}" ]; then
       name="${1}"
     else
       while
-        _get_user_input "Name your bash ${bash_type}" && name=_user_input || return 1
+        local _inputReqStr="Name your bash ${bash_type}"
+        name=$(_get_user_input "${_inputReqStr}" | perl -lne "print $1 if /^(?!${_inputReqStr})(.+)/")
+        [[ -z $name ]] && return 1
         _bash_has_cmd "${name}"
       do
         :
