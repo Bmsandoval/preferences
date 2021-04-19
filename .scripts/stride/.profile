@@ -30,7 +30,7 @@ stride-bastion-onboard() {
 #   Validates provided username doesn't already exist on the box. Prevents deletion of similarly named employee's keys
 
   # Ensure functional dependencies exist
-  local _funcsReq _funcsMiss _username _sshPubKey _backingFile  _capturedSshKey _inputReqStr
+  local _funcsReq _funcsMiss _username _sshPubKey _capturedSshKey
   _funcsReq=( "__get_user_input_discreet" "__mktemp_with_contents" ); _funcsMiss=()
   for _func in "${_funcsReq[@]}"; do declare -F "${_func}" > /dev/null || _funcsMiss+=("${_func}"); done; unset _func
   [ "${#_funcsMiss[@]}" != "0" ] && echo "missing ${#_funcsMiss[@]} external function(s): ${_funcsMiss[*]}" && return 1
@@ -66,12 +66,12 @@ stride-bastion-onboard() {
       do
         :
       done
-      _backingFile=$(mktemp)
+      _tempFile=$(mktemp)
       echo "validating keys don't already exist"
       for env in "${STRIDE_ENVIRONMENTS[@]}"; do
-        aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_backingFile}" &
+        aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_tempFile}" &
       done; wait
-      if [[ -f "${_backingFile}" ]]; then
+      if [[ "$(< "${_tempFile}" wc -l)" != "0" ]]; then
         echo "pub key ${_username}.pub already exists"
       else
         local _tempFile
@@ -81,9 +81,10 @@ stride-bastion-onboard() {
         done; wait
         echo "validating keys added"
         for env in "${STRIDE_ENVIRONMENTS[@]}"; do
-          aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_backingFile}" &
+          aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' | grep "/${_username}.pub" >> "${_tempFile}" &
         done; wait
-        if [[ "$( < "${_backingFile}" wc -l \
+        _tempFile=$(mktemp)
+        if [[ "$( < "${_tempFile}" wc -l \
         | tr -d '[:space:]')" != "${#STRIDE_ENVIRONMENTS[@]}" ]]
         then
           echo "something went wrong, user keys not found"
@@ -100,7 +101,7 @@ function stride-bastion-offboard {
 #   This command requires you be logged into AWS SSO. Elegant error handling if not logged in
 #   Validates provided username exists on the box before attempting removal
 
-  local _username _backingFile
+  local _username _tempFile
   _username="${1}"
   # Verify logged in. Already gives a readable error if logged out so don't need a warning
   if [[ 0 == $(aws sts get-caller-identity >/dev/null; echo $?) ]]; then
@@ -108,24 +109,24 @@ function stride-bastion-offboard {
       echo "Unknown Username. First argument to this command must be a username of the form '{first_initial}{lastname}'. EX: bsandoval"
       aws s3api list-objects --bucket "stride-prod-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}'
     else
-      _backingFile=$(mktemp)
+      _tempFile=$(mktemp)
       for env in "${STRIDE_ENVIRONMENTS[@]}"; do
         aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' \
-        | grep "/${_username}.pub" >> "${_backingFile}" &
+        | grep "/${_username}.pub" >> "${_tempFile}" &
       done; wait
-      if [[ "$(cat "${_backingFile}" wc -l | tr -d '[:space:]')" != "${#STRIDE_ENVIRONMENTS[@]}" ]]; then
+      if [[ "$(cat "${_tempFile}" wc -l | tr -d '[:space:]')" != "${#STRIDE_ENVIRONMENTS[@]}" ]]; then
         echo "user does not exist in bastion"
       else
-        rm -f "${_backingFile}"
         for env in "${STRIDE_ENVIRONMENTS[@]}"; do
           aws s3api delete-object --bucket "stride-${env}-bastion" --key "public-keys/${_username}.pub" &
         done; wait
         echo "validating keys removed"
+        _tempFile=$(mktemp)
         for env in "${STRIDE_ENVIRONMENTS[@]}"; do
           aws s3api list-objects --bucket "stride-${env}-bastion" --prefix public-keys/ --output text --query 'Contents[*].{key:Key}' \
-          | grep "/${_username}.pub" >> "${_backingFile}" &
+          | grep "/${_username}.pub" >> "${_tempFile}" &
         done; wait
-        if [[ "$( < "${_backingFile}" wc -l | tr -d '[:space:]')" != "0" ]]; then
+        if [[ "$( < "${_tempFile}" wc -l | tr -d '[:space:]')" != "0" ]]; then
           echo "something went wrong, user keys not found"
         fi
       fi
@@ -139,48 +140,38 @@ stride-bastion-ssh() {
 #   Ensures you are on the right vpn for the bastion that's been requested
 #   If requested key not found locally, lists available keys for environment
 
-  local _funcs_req _funcs_miss _func _vars_req _vars_miss _var _environment _keys _key
-  _funcs_req=( "vpn_required" )
-  _funcs_miss=()
-  _vars_req=( "STRIDE_BASTION_USERNAME" )
-  _vars_miss=()
-  for _func in "${_funcs_req[@]}"; do
-    declare -F "${_func}" > /dev/null || _funcs_miss+=("${_func}")
-  done;
-  for _var in "${_vars_req[@]}"; do
-    [[ -n ${!_var+x} ]] || _vars_miss+=("${_var}")
-  done;
-  if [[ "${#_funcs_miss[@]}" != "0" ]] || [[ "${#_vars_miss[@]}" != "0" ]]; then
-    echo "missing ${#_funcs_miss[@]} external function(s): ${_funcs_miss[*]}"
-    echo "missing ${#_vars_miss[@]} external variables(s): ${_vars_miss[*]}"
+  local _funcs_req _func _vars_req _var _env _keys _key _tempFile
+  _funcs_req=( "vpn_required" ) _vars_req=( "STRIDE_BASTION_USERNAME" ) _tempFile=$(mktemp)
+  for _func in "${_funcs_req[@]}"; do declare -F "${_func}" > /dev/null || echo "${_func}" >> "${_tempFile}" & done;
+  for _var in "${_vars_req[@]}"; do [[ -n ${!_var+x} ]] || echo "${_var}" >> "${_tempFile}" & done;
+  wait
+  if [[ "$( < "${_tempFile}" wc -l | tr -d '[:space:]')" != "0" ]]; then
+    echo -e "Missing dependencies: " && perl -ne 'print "$1 " if /^([^\n]+)/' "${_tempFile}"
   else
-    _environment="${1}"
+    _env="${1}"
     _key=${2}
-    read -ra _keys <<<"$(find ~/.ssh -type f -exec basename \\\{\} \; \
-    | perl -ne 'print "$1\n" if /'"${_environment}"'-stride-(.+)-[0-9]+.pem/')"
-    if [[ "${_environment}" != "dev" ]] && [[ "${_environment}" != "prod" ]]; then
-      # Must specify a environment to connect to
+    read -ra _keys <<<"$(find ~/.ssh -type f \
+    | perl -ne 'print "$1\n" if /'"${_env}"'-stride-(.+)-[0-9]+.pem/')"
+    if [[ "${_env}" != "dev" ]] && [[ "${_env}" != "prod" ]]; then
       echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
     elif [[ ! "${_keys[*]}" =~ (^|[[:space:]])"${_key}"($|[[:space:]]) ]]; then
-      echo -e "${_environment} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
-    elif [[ $(vpn_required "${_environment}") == "connecting" ]]; then
-      echo "complete VPN login and try again"
+      echo -e "${_env} ${_key} ssh key not found. \n\nFound the following: \n${_keys[*]}\n"
+    elif [[ $(vpn_required "${_env}") == "connecting" ]]; then
+      echo "Complete VPN login and try again"
     else
       # delete all keys from your ssh keychain (ssh agent only cares about your first 5 keys)
       ssh-add -D
       # add user's personal ssh key
       ssh-add -K "$HOME/.ssh/id_rsa"
       # add the correct key to your keychain
-      ssh-add -K "$HOME/.ssh/${_environment}-stride-${_key}-*.pem"
+      ssh-add -K "$HOME/.ssh/${_env}-stride-${_key}-*.pem"
       # ssh to env-based bastion
-      if [[ "${_environment}" == "prod" ]]; then
-        ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.prod.stridehealth.com"
-      elif [[ "${_environment}" == "dev" ]]; then
-        ssh -A  "${STRIDE_BASTION_USERNAME}@bastion.stridehealth.io"
-      fi
+      local _envFlag
+      [[ "${_env}" == "prod" ]] && _envFlag=".prod"
+      ssh -A "${STRIDE_BASTION_USERNAME}@bastion${_envFlag}.stridehealth.io"
     fi
   fi
-}
+} 2>/dev/null
 
 
 #    _  _ ___   _   _  _____ _  _    ___   _   ___ _  _ ___
@@ -253,7 +244,7 @@ stride-vericred-pull-plans() {
 #   Vericred sometimes uploads previous year's data late into next year so we can't make assumptions on the year.
 #   Runs all states in parallel
 
-  local _planYear _path _outFile _fileKey
+  local _planYear _path
   _planYear=${1}
   if [[ "" == "$(echo "${_planYear}" | perl -ne 'print if /^[0-9]{4}$/')" ]]; then
     echo "Unknown or invalid year. First argument to this command must be the plan year to fetch, in YYYY format. Recieved: '${_planYear}'"
@@ -262,10 +253,10 @@ stride-vericred-pull-plans() {
     mkdir -p _path
     echo "pulling ${_planYear} plans for all states"
     for _stateCode in "${ALL_STATE_CODES[@]}"; do # go through every US state code
-      _fileKey="production/plans/stride_health/csv/individual/${_stateCode}/${_planYear}/plans.csv"
-      _outFile="${_path}/$(echo "${_stateCode}" \
-      | tr '[:upper:]' '[:lower:]')_plans.csv"
-      aws s3api get-object --profile vericred --bucket vericred-emr-workers --key "${_fileKey}" "${_outFile}" &
+      aws s3api get-object --profile vericred --bucket vericred-emr-workers \
+        --key "production/plans/stride_health/csv/individual/${_stateCode}/${_planYear}/plans.csv" \
+        "${_path}/$(echo "${_stateCode}" | tr '[:upper:]' '[:lower:]')_plans.csv" \
+        &
     done; unset _stateCode
     wait
   fi
