@@ -135,6 +135,44 @@ function stride-bastion-offboard {
 } 2> /dev/null
 
 
+stride-inspector-bad-instances() {
+# Purpose: List high-severity instances from inspector
+# Returns: AMI and hostname
+
+  mkfifo pipe0
+  aws inspector list-findings --filter severities="High" \
+  | perl -e '
+    my $i = 0;
+    while (<>) {
+      next if not (/^\s+"(arn:aws:inspector:[^:]+:[^:]+:target.+)",/);
+      $i++;
+      print "$1 ";
+      print "\n" if ($i % 100 == 0);
+    }
+    print "\n" if ($i % 100 != 0);'\
+  | while read -r _input; do
+      # Run this part of the pipe concurrently
+      aws inspector describe-findings \
+        --output text \
+        --query 'findings[*].assetAttributes.{Name:agentId, Value: hostname}' \
+        --finding-arns ${_input[*]} > pipe0 &
+    done
+  # Dislocate pipe to listen for children
+  cat < pipe0 \
+  | perl -e '
+    %seen = ();
+    foreach $item (<>) {
+        unless ($seen{$item}) {
+            # if we get here, we have not seen it before
+            $seen{$item} = 1;
+            print $item
+        }
+    }' &
+  wait
+  rm pipe0
+} 2>/dev/null
+
+
 stride-bastion-ssh() {
 # Purpose: Helper function for sshing into proper bastion with requested ssh keys
 #   Ensures you are on the right vpn for the bastion that's been requested
