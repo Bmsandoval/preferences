@@ -1,1 +1,1 @@
-SCRIPT_LOCATIONS=("general" "terraform" "awscli" "net" "fzf" "qikbash")
+SCRIPT_LOCATIONS=("general" "terraform" "awscli" "net" "fzf" "qikbash" "norts")

@@ -135,41 +135,50 @@ function stride-bastion-offboard {
 } 2> /dev/null
 
 
-stride-inspector-bad-instances() {
+stride-inspector-check-patch() {
 # Purpose: List high-severity instances from inspector
 # Returns: AMI and hostname
 
-  mkfifo pipe0
-  aws inspector list-findings --filter severities="High" \
-  | perl -e '
-    my $i = 0;
-    while (<>) {
-      next if not (/^\s+"(arn:aws:inspector:[^:]+:[^:]+:target.+)",/);
-      $i++;
-      print "$1 ";
-      print "\n" if ($i % 100 == 0);
-    }
-    print "\n" if ($i % 100 != 0);'\
-  | while read -r _input; do
-      # Run this part of the pipe concurrently
-      aws inspector describe-findings \
-        --output text \
-        --query 'findings[*].assetAttributes.{Name:agentId, Value: hostname}' \
-        --finding-arns ${_input[*]} > pipe0 &
-    done
-  # Dislocate pipe to listen for children
-  cat < pipe0 \
-  | perl -e '
-    %seen = ();
-    foreach $item (<>) {
-        unless ($seen{$item}) {
-            # if we get here, we have not seen it before
-            $seen{$item} = 1;
-            print $item
+  # ["us-west-1"]="us-west-1" ["us-west-2"]="us-west-2")
+  local _region
+  if [[ ! 'prod dev' =~ ${1} ]]; then
+    echo "Unknown Region. First argument to this command must be a region: 'us-west-2' for dev, or 'us-west-1' for prod"
+  else
+    [ "${1}" == 'prod' ] && _region='us-west-1' || _region='us-west-2'
+    rm pipe0; mkfifo pipe0
+    aws inspector list-findings --region "${_region}" --filter "creationTimeRange={beginDate=2021-02-01,endDate=2222-04-23}" \
+    | perl -e '
+      my $i = 0;
+      while (<>) {
+        next if not (/^\s+"(arn:aws:inspector:[^:]+:[^:]+:target.+)",/);
+        $i++;
+        print "$1 ";
+        print "\n" if ($i % 100 == 0);
+      }
+      print "\n";'\
+    | while read -r _input; do
+        # Run this part of the pipe concurrently
+        aws inspector describe-findings \
+          --output text \
+          --query 'findings[*].id' \
+          --finding-arns ${_input[*]} > pipe0 &
+      done
+    # Dislocate pipe to listen for children
+    cat < pipe0 \
+    | perl -lne '
+      %seen = ();
+      foreach $items (<>) {
+        foreach $item (split(/\s+/, $items)) {
+          unless ($seen{$item}) {
+              # if we get here, we have not seen it before
+              $seen{$item} = 1;
+              print $item;
+          }
         }
-    }' &
-  wait
-  rm pipe0
+      }' &
+    wait
+    rm pipe0
+  fi
 } 2>/dev/null
 
 
@@ -188,8 +197,8 @@ stride-bastion-ssh() {
   else
     _env="${1}"
     _key=${2}
-    read -ra _keys <<<"$(find ~/.ssh -type f \
-    | perl -ne 'print "$1\n" if /'"${_env}"'-stride-(.+)-[0-9]+.pem/')"
+    read -ra _keys <<< "$(find ~/.ssh -type f \
+    | perl -ne 'print "$1 " if /'"${_env}"'-stride-(.+)-[0-9]+.pem/')"
     if [[ "${_env}" != "dev" ]] && [[ "${_env}" != "prod" ]]; then
       echo "Unknown Environment. First argument to this command must be 'dev' or 'prod'"
     elif [[ ! "${_keys[*]}" =~ (^|[[:space:]])"${_key}"($|[[:space:]]) ]]; then
