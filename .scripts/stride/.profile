@@ -134,53 +134,116 @@ function stride-bastion-offboard {
   fi
 } 2> /dev/null
 
+#testy () {
+##  local _sample=<<EOF
+##{"threat_severity":"Critical","public_date":"2021-03-05T00:00:00Z","bugzilla":{"description":"CVE-2021-27363 kernel: iscsi: unrestricted access to sessions and handles","id":"1930079","url":"https://bugzilla.redhat.com/show_bug.cgi?id=1930079"},"cvss3":{"cvss3_base_score":"4.4","cvss3_scoring_vector":"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:L","status":"verified"},"cwe":"CWE-200","details":["An issue was discovered in the Linux kernel through 5.11.3. A kernel pointer leak can be used to determine the address of the iscsi_transport structure. When an iSCSI transport is registered with the iSCSI subsystem, the transport's handle is available to unprivileged users via the sysfs file system, at /sys/class/iscsi_transport/$TRANSPORT_NAME/handle. When read, the show_transport_handle function (in drivers/scsi/scsi_transport_iscsi.c) is called, which leaks the handle. This handle is actually the pointer to an iscsi_transport struct in the kernel module's global variables.","A flaw was found in the way access to sessions and handles was handled in the iSCSI driver in the Linux kernel. A local user could use this flaw to leak iSCSI transport handle kernel address or end arbitrary iSCSI connections on the system."],"acknowledgement":"Red Hat would like to thank Adam Nichols (GRIMM) for reporting this issue.","affected_release":[{"product_name":"Red Hat Enterprise Linux 7","release_date":"2021-04-06T00:00:00Z","advisory":"RHSA-2021:1070","cpe":"cpe:/a:redhat:rhel_extras_rt:7","package":"kernel-rt-0:3.10.0-1160.24.1.rt56.1161.el7"},{"product_name":"Red Hat Enterprise Linux 7","release_date":"2021-04-08T00:00:00Z","advisory":"RHSA-2021:1071","cpe":"cpe:/o:redhat:enterprise_linux:7","package":"kernel-0:3.10.0-1160.24.1.el7"},{"product_name":"Red Hat Enterprise Linux 7.2 Advanced Update Support","release_date":"2021-04-20T00:00:00Z","advisory":"RHSA-2021:1289","cpe":"cpe:/o:redhat:rhel_aus:7.2","package":"kernel-0:3.10.0-327.96.1.el7"},{"product_name":"Red Hat Enterprise Linux 7.4 Advanced Update Support","release_date":"2021-04-20T00:00:00Z","advisory":"RHSA-2021:1267","cpe":"cpe:/o:redhat:rhel_aus:7.4","package":"kernel-0:3.10.0-693.84.1.el7"},{"product_name":"Red Hat Enterprise Linux 7.4 Telco Extended Update Support","release_date":"2021-04-20T00:00:00Z","advisory":"RHSA-2021:1267","cpe":"cpe:/o:redhat:rhel_tus:7.4","package":"kernel-0:3.10.0-693.84.1.el7"},{"product_name":"Red Hat Enterprise Linux 7.4 Update Services for SAP Solutions","release_date":"2021-04-20T00:00:00Z","advisory":"RHSA-2021:1267","cpe":"cpe:/o:redhat:rhel_e4s:7.4","package":"kernel-0:3.10.0-693.84.1.el7"},{"product_name":"Red Hat Enterprise Linux 8","release_date":"2021-04-06T00:00:00Z","advisory":"RHSA-2021:1081","cpe":"cpe:/a:redhat:enterprise_linux:8","package":"kernel-rt-0:4.18.0-240.22.1.rt7.77.el8_3"},{"product_name":"Red Hat Enterprise Linux 8","release_date":"2021-04-06T00:00:00Z","advisory":"RHSA-2021:1093","cpe":"cpe:/o:redhat:enterprise_linux:8","package":"kernel-0:4.18.0-240.22.1.el8_3"},{"product_name":"Red Hat Enterprise Linux 8.1 Extended Update Support","release_date":"2021-04-13T00:00:00Z","advisory":"RHSA-2021:1171","cpe":"cpe:/o:redhat:rhel_eus:8.1","package":"kernel-0:4.18.0-147.44.1.el8_1"},{"product_name":"Red Hat Enterprise Linux 8.2 Extended Update Support","release_date":"2021-04-20T00:00:00Z","advisory":"RHSA-2021:1279","cpe":"cpe:/a:redhat:rhel_extras_rt:8","package":"kernel-rt-0:4.18.0-193.51.1.rt13.101.el8_2"},{"product_name":"Red Hat Enterprise Linux 8.2 Extended Update Support","release_date":"2021-04-20T00:00:00Z","advisory":"RHSA-2021:1272","cpe":"cpe:/o:redhat:rhel_eus:8.2","package":"kernel-0:4.18.0-193.51.1.el8_2"}],"package_state":[{"product_name":"Red Hat Enterprise Linux 6","fix_state":"Out of support scope","package_name":"kernel","cpe":"cpe:/o:redhat:enterprise_linux:6"},{"product_name":"Red Hat Enterprise Linux 7","fix_state":"Out of support scope","package_name":"kernel-alt","cpe":"cpe:/o:redhat:enterprise_linux:7"}],"references":["https://www.openwall.com/lists/oss-security/2021/03/06/1"],"name":"CVE-2021-27363","mitigation":{"value":"The LIBISCSI module will be auto-loaded when required, its use can be disabled  by preventing the module from loading with the following instructions:\n# echo \"install libiscsi /bin/true\" >> /etc/modprobe.d/disable-libiscsi.conf\nThe system will need to be restarted if the libiscsi modules are loaded. In most circumstances, the libiscsi kernel modules will be unable to be unloaded while any network interfaces are active and the protocol is in use.\nIf the system requires iscsi to work correctly, this mitigation may not be suitable.\nIf you need further assistance, see KCS article https://access.redhat.com/solutions/41278 or contact Red Hat Global Support Services.","lang":"en:us"},"csaw":false}
+##EOF
+##  echo "${_sample}" \
+##    | jq <<EOF
+##    | select(.threat_severity == "Important" or .threat_severity == "Critical")
+##    | .package_state[]
+##    | select(.product_name == "Red Hat Enterprise Linux 6")
+##    | .fix_state
+##EOF
+##  cat <<EOF \
+##    | jq <<EOJQ
+##    | select(.threat_severity == "Important" or .threat_severity == "Critical")
+##    | .package_state[]
+##    | select(.product_name == "Red Hat Enterprise Linux 6")
+##    | .fix_state'
+##EOJQ
+##
+##EOF
+##  local _severities=('Critical' 'Important')
+##  local _severity_filter="$( printf " or .threat_severity == '%s'" "${_severities[@]}" | sed 's/^ or //')"
+##  echo "${regex}"
+#}
 
-stride-inspector-check-patch() {
+
+stride-inspector-check-patch() { # region, severity, product
 # Purpose: List high-severity instances from inspector
 # Returns: AMI and hostname
+#
+# Calls `aws inspector list-assessment-runs` and filters for most recent runs
+# Gets findings for each run using `aws inspector describe-assessment-runs`
+# Gets the CVE for each finding using `aws inspector describe-findings`
+# Queries RedHat api with each UNIQUE CVE to get current details
 
-  # ["us-west-1"]="us-west-1" ["us-west-2"]="us-west-2")
-  local _region
-  if [[ ! 'prod dev' =~ ${1} ]]; then
-    echo "Unknown Region. First argument to this command must be a region: 'us-west-2' for dev, or 'us-west-1' for prod"
+  local _redhat_product="Red Hat Enterprise Linux 6"
+  local _severities=('Critical' 'Important')
+  local _severity_filter
+  _severity_filter="$( printf " or .threat_severity == '%s'" "${_severities[@]}" | sed 's/^ or //')"
+
+  local _region _backing_file
+  local _allowed_regions="us-west-1 us-west-2"
+  _region="${1}"
+  if [[ 0 != $(aws sts get-caller-identity >/dev/null; echo $?) ]]; then
+    echo "Not logged in. Try 'aws sts get-caller-identity' to see if logged in, log in with 'aws sso login'"
+  elif [[ ! "${_allowed_regions}" =~ ${_region} ]]; then
+    echo "Unknown Region. First argument to this command must be a region: 'us-west-2' for prod, or 'us-west-1' for dev"
   else
-    [ "${1}" == 'prod' ] && _region='us-west-1' || _region='us-west-2'
-    rm pipe0; mkfifo pipe0
-    aws inspector list-findings --region "${_region}" --filter "creationTimeRange={beginDate=2021-02-01,endDate=2222-04-23}" \
+    read -ra _assessments <<< "$(aws inspector list-assessment-runs \
+      --region "${_region}" \
+      --filter "completionTimeRange={beginDate=$(date -v -7d),endDate=$(date +%Y-%m-%d)}" \
+    | perl -ne 'print "$1 " if /^\s+"(arn:aws:inspector:[^:]+:[^:]+:target.+)"/')"
+
+    read -ra _list_findings <<< "$(aws inspector list-findings \
+      --region "${_region}" \
+      --assessment-run-arns ${_assessments[*]} \
+    | perl -ne 'print "$1 " if /^\s+"(arn:aws:inspector:[^:]+:[^:]+:target.+)"/')"
+
+    read -ra _finding_cves <<< "$(aws inspector describe-findings \
+      --region "${_region}" \
+      --output text \
+      --query 'findings[*].id' \
+      --finding-arns ${_list_findings[*]} \
     | perl -e '
-      my $i = 0;
-      while (<>) {
-        next if not (/^\s+"(arn:aws:inspector:[^:]+:[^:]+:target.+)",/);
-        $i++;
-        print "$1 ";
-        print "\n" if ($i % 100 == 0);
-      }
-      print "\n";'\
-    | while read -r _input; do
-        # Run this part of the pipe concurrently
-        aws inspector describe-findings \
-          --output text \
-          --query 'findings[*].id' \
-          --finding-arns ${_input[*]} > pipe0 &
-      done
-    # Dislocate pipe to listen for children
-    cat < pipe0 \
-    | perl -lne '
-      %seen = ();
       foreach $items (<>) {
         foreach $item (split(/\s+/, $items)) {
           unless ($seen{$item}) {
               # if we get here, we have not seen it before
               $seen{$item} = 1;
-              print $item;
-          }
-        }
-      }' &
+              print "$item " if $item =~ /[A-Z]+-[0-9]{4}-[0-9]+/;}}}')"
+    _backing_file=$(mktemp -u)
+    for _cve in "${_finding_cves[@]}"; do
+      curl --location --request GET "https://access.redhat.com/hydra/rest/securitydata/cve/${_cve}.json" \
+      | perl -pnle '/./' \
+      | while read -r _input; do
+          local _output
+          if [[ "${_input}" =~ '{"message":"Not Found"}' ]]; then
+            _output="Red Hat has no data for CVE: ${_cve}"
+          else
+            local _severity _fix_state
+            _severity="$(echo "${_input}" | jq -r '.threat_severity')"
+            if [[ ! "${_severities[*]}" =~ ${_severity} ]]; then
+              continue
+            fi
+            _fix_state="$(echo "${_input}"\
+              | jq -r '.
+              | .package_state[]
+              | select(.product_name | startswith("Red Hat Enterprise Linux 6"))
+              | .fix_state?')"
+            if [[ "${_fix_state}" == "" ]]; then
+              _fix_state="released - $(echo "${_input}"\
+              | jq -r '.
+              | .affected_release[]
+              | select(.product_name | startswith("Red Hat Enterprise Linux 6"))
+              | .release_date')"
+            fi
+            _output="CVE: ${_cve}\nOS: ${_redhat_product}\nSeverity: ${_severity}\nFix State: ${_fix_state}"
+          fi
+          while ! touch "${_backing_file}"; do
+            sleep .2
+          done
+          echo -e "${_output}\n"
+          sleep .2
+          rm -rf "${_backing_file}"
+        done \
+        &
+    done
     wait
-    rm pipe0
-  fi
+  fi; unset _assessments
 } 2>/dev/null
-
 
 stride-bastion-ssh() {
 # Purpose: Helper function for sshing into proper bastion with requested ssh keys
