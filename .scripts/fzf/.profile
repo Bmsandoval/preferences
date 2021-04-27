@@ -27,40 +27,12 @@ j() {
         cd $(autojump $@)
         return
     fi
-    local dest_dir=$(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
-    #local dest_dir=$(autojump -s |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+#    local dest_dir=$(autojump -s | sed '/_____/Q; s/^[0-9,.:]*\s*//' |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
+    local dest_dir=$(autojump -s |  fzf --height 80% --nth 1.. --reverse --inline-info +s --tac --query "${*##-* }" )
    if [[ $dest_dir != '' ]]; then
       cd "$dest_dir"
    fi
 }
-
-note_find () {
-  $(cd $NOTES_LOCATIONS; find . -type f | fzf --preview="cat {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
-}
-
-alias ne="note_edit"
-note_edit () {
-  location=$(cd $NOTES_LOCATIONS; find . -type f | fzf --preview="cat {}" --preview-window=right:60%:wrap --multi --reverse)
-  echo "${location}"
-  # strip leading dot that find leaves behind
-  location=${location/./}
-  # append path
-  location="$NOTES_LOCATIONS/$location"
-  # select line
-  lines=$(cat -n "$location" | fzf)
-  # following 3 lines get the line number that cat -n gave us
-  shopt -s extglob
-  read -r lines _ <<< "${lines//[^[:digit:] ]/}"
-  line=${lines##+(0)}
-  # open file at line number
-  vim +"${line}" "$location"
-}
-
-alias nn="note_new"
-note_new () {
-  locates=$(cd $NOTES_LOCATIONS; find . -type d | fzf --preview="tree -C {}" --preview-window=right:60%:wrap --multi --reverse)
-}
-
 
 #bind -x '"\C-n": cdn'
 # file previews
