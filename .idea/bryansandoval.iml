@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="Go" enabled="true" />
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/Creative Cloud Files" />
+      <excludeFolder url="file://$MODULE_DIR$/Desktop" />
+      <excludeFolder url="file://$MODULE_DIR$/.aspnet" />
+      <excludeFolder url="file://$MODULE_DIR$/.bash_sessions" />
+      <excludeFolder url="file://$MODULE_DIR$/.cache" />
+      <excludeFolder url="file://$MODULE_DIR$/.cocoapods" />
+      <excludeFolder url="file://$MODULE_DIR$/.config" />
+      <excludeFolder url="file://$MODULE_DIR$/.docker" />
+      <excludeFolder url="file://$MODULE_DIR$/.fiddler" />
+      <excludeFolder url="file://$MODULE_DIR$/.gitkraken" />
+      <excludeFolder url="file://$MODULE_DIR$/.kube" />
+      <excludeFolder url="file://$MODULE_DIR$/.markdownNavigator" />
+      <excludeFolder url="file://$MODULE_DIR$/.matplotlib" />
+      <excludeFolder url="file://$MODULE_DIR$/.minikube" />
+      <excludeFolder url="file://$MODULE_DIR$/.mono" />
+      <excludeFolder url="file://$MODULE_DIR$/.npm" />
+      <excludeFolder url="file://$MODULE_DIR$/.oracle_jre_usage" />
+      <excludeFolder url="file://$MODULE_DIR$/.react-native-cli" />
+      <excludeFolder url="file://$MODULE_DIR$/.sympi" />
+      <excludeFolder url="file://$MODULE_DIR$/.terraform.d" />
+      <excludeFolder url="file://$MODULE_DIR$/.Trash" />
+      <excludeFolder url="file://$MODULE_DIR$/.vim" />
+      <excludeFolder url="file://$MODULE_DIR$/Applications" />
+      <excludeFolder url="file://$MODULE_DIR$/Calibre Library" />
+      <excludeFolder url="file://$MODULE_DIR$/Doceri" />
+      <excludeFolder url="file://$MODULE_DIR$/Documents" />
+      <excludeFolder url="file://$MODULE_DIR$/Downloads" />
+      <excludeFolder url="file://$MODULE_DIR$/googledrive" />
+      <excludeFolder url="file://$MODULE_DIR$/images" />
+      <excludeFolder url="file://$MODULE_DIR$/Library" />
+      <excludeFolder url="file://$MODULE_DIR$/Movies" />
+      <excludeFolder url="file://$MODULE_DIR$/Music" />
+      <excludeFolder url="file://$MODULE_DIR$/Pictures" />
+      <excludeFolder url="file://$MODULE_DIR$/Postman" />
+      <excludeFolder url="file://$MODULE_DIR$/projects" />
+      <excludeFolder url="file://$MODULE_DIR$/Public" />
+      <excludeFolder url="file://$MODULE_DIR$/PycharmProjects" />
+      <excludeFolder url="file://$MODULE_DIR$/VirtualBox VMs" />
+      <excludeFolder url="file://$MODULE_DIR$/.android" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
