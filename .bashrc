@@ -165,17 +165,22 @@ export  PATH=$PATH:$GOPATH/bin
 # https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
 HOMEDIR=`eval _homedir="~" && echo "${_homedir}"` && unset _homedir
 unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     BASHBASE="${HOMEDIR}/.profile";;
-    Darwin*)    
+case "${unameOut}"
+	in Linux*)     
+		BASHBASE="${HOMEDIR}/.profile"
+
+		if [[ 0 == $(grep Microsoft /proc/version >/dev/null; echo $?) ]]; then
+			# WINDOWS SUBSYSTEM FOR LINUX
+			alias dotnet="dotnet.exe"
+		fi
+	;; Darwin*)    
 		# berw install gnu-sed
 		alias sed="gsed"
 		BASHBASE="${HOMEDIR}/.bash_profile"
-    [ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh || echo "autojump not installed"
-		;;
-	CYGWIN*)    machine=Cygwin;;
-	MINGW*)     machine=MinGw;;
-    *)          echo "unknown machine: ${unameOut}";;
+		[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh || echo "autojump not installed"
+	;; CYGWIN*)    machine=Cygwin 
+	;; MINGW*)     machine=MinGw
+	;; *)          echo "unknown machine: ${unameOut}"
 esac
 
 alias bashbase="vim ~/.bashrc"
@@ -255,3 +260,4 @@ export LSCOLORS=ExFxCxDxBxegedabagacad
 # Timelord CLI — tl alias + tab completion
 source "/Users/bryansandoval/projects/timelord/cli/bin/timelord.profile"
 export PATH="/usr/local/opt/node@22/bin:$PATH"
+#[ -f ~/.fzf.bash ] && source ~/.fzf.bash
