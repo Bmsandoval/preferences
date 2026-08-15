@@ -257,7 +257,8 @@ jwtd() {
 export CLICOLOR=1
 export LSCOLORS=ExFxCxDxBxegedabagacad
 
-# Timelord CLI — tl alias + tab completion
-source "/Users/bryansandoval/projects/timelord/cli/bin/timelord.profile"
+# Timelord CLI — tl alias + tab completion — loaded via ~/.scripts/timelord/.profile
+# (gitignored shim; add "timelord" to SCRIPT_LOCATIONS in ~/.scripts/.env). The
+# raw absolute-path source line was removed so it does not ship in this public repo.
 export PATH="/usr/local/opt/node@22/bin:$PATH"
 #[ -f ~/.fzf.bash ] && source ~/.fzf.bash
