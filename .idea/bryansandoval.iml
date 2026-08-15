@@ -42,6 +42,8 @@
       <excludeFolder url="file://$MODULE_DIR$/PycharmProjects" />
       <excludeFolder url="file://$MODULE_DIR$/VirtualBox VMs" />
       <excludeFolder url="file://$MODULE_DIR$/.android" />
+      <excludeFolder url="file://$MODULE_DIR$/.landscape" />
+      <excludeFolder url="file://$MODULE_DIR$/.fzf" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -57,10 +57,10 @@ alias be="bashedit"
 bashedit () {
 # Purpose: Helper function to fuzzy search script files and open them at a specific line using Vim
   # select a file
-  location=$(cd $__QIKBASH_SCRIPT_DIR; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
+  location=$(cd $__QIKBASH_SCRIPT_DIR/..; find . -type f ! -name '.env.ex' | fzf --preview="cat -n {} | head -200" --preview-window=right:60%:wrap --multi --reverse)
   if [[ "${location}" != "" ]]; then
     # strip leading dot that find leaves behind and prepend file directory
-    location="${__QIKBASH_SCRIPT_DIR}/${location/./}"
+    location="${__QIKBASH_SCRIPT_DIR}/../${location/./}"
     # select line a specific line
     local _line=$(cat -n "$location" | fzf)
     if [[ "${_line}" != "" ]]; then

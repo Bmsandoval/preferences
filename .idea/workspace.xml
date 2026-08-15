@@ -2,8 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="579888ae-74ca-485c-94f2-35b4acb6f9f6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.bash_prompt" beforeDir="false" afterPath="$PROJECT_DIR$/.bash_prompt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.bashrc" beforeDir="false" afterPath="$PROJECT_DIR$/.bashrc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ideavimrc" beforeDir="false" afterPath="$PROJECT_DIR$/.ideavimrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/bryansandoval.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/bryansandoval.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/.env.ex" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/.script_entry" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/.script_entry" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/deprecated/setup/get-falcon-sensor.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/deprecated/setup/get-falcon-sensor.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/deprecated/setup/install-everything.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/deprecated/setup/install-everything.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/deprecated/setup/install-postman.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/deprecated/setup/install-postman.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/deprecated/setup/slack-dark-theme.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/deprecated/setup/slack-dark-theme.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/deprecated/setup/slack-fix-dark.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/deprecated/setup/slack-fix-dark.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/general/darkify-slack.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/general/darkify-slack.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/general/host-ssh.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/general/host-ssh.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/general/lock-screen.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/general/lock-screen.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/general/note-find.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/general/note-find.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/general/postman-download-and-install.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/general/postman-download-and-install.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/general/update-postman.sh" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/general/update-postman.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.scripts/qikbash/.profile" beforeDir="false" afterPath="$PROJECT_DIR$/.scripts/qikbash/.profile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +52,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1617142369140</updated>
+      <workItem from="1620148326269" duration="629000" />
+      <workItem from="1620148991152" duration="2004000" />
+      <workItem from="1620152739357" duration="199000" />
+      <workItem from="1620152950990" duration="374000" />
+      <workItem from="1620155674255" duration="2344000" />
+      <workItem from="1620233875896" duration="7734000" />
     </task>
     <servers />
   </component>
@@ -44,5 +66,17 @@
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName=".profile" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
