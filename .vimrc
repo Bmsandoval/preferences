@@ -2,27 +2,27 @@ set nocompatible              " be iMproved, required
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+"set rtp+=~/.vim/bundle/Vundle.vim
+"call vundle#begin()
 " All of your Plugins must be added after the preceding line
 
 " let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
+"Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'sjl/badwolf'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'itchyny/lightline.vim'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'dhruvasagar/vim-table-mode'
-Plugin 'terryma/vim-multiple-cursors'
-Plugin 'tpope/vim-surround'
-Plugin 'justinmk/vim-sneak'
-Plugin 'vim-airline/vim-airline'
-Plugin 'severin-lemaignan/vim-minimap'
+"Plugin 'sjl/badwolf'
+"Plugin 'ctrlpvim/ctrlp.vim'
+"Plugin 'itchyny/lightline.vim'
+"Plugin 'airblade/vim-gitgutter'
+"Plugin 'nathanaelkane/vim-indent-guides'
+"Plugin 'dhruvasagar/vim-table-mode'
+"Plugin 'terryma/vim-multiple-cursors'
+"Plugin 'tpope/vim-surround'
+"Plugin 'justinmk/vim-sneak'
+"Plugin 'vim-airline/vim-airline'
+"Plugin 'severin-lemaignan/vim-minimap'
 
 " All of your Plugins must be added before the following line
-call vundle#end()            " required
+"call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
@@ -37,7 +37,7 @@ filetype plugin indent on    " required
 " Put your non-Plugin stuff after this line
 
 
-colorscheme delek
+colorscheme evening
 
 " allow saving a readonly file
 cmap w!! w !sudo tee > /dev/null %

@@ -149,9 +149,10 @@ source ~/.scripts/.script_entry
 #[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 #[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export  PATH=$PATH:/usr/local/go/bin:$GOBIN
-export GOROOT=/usr/local/opt/go/libexec
-export  PATH=$PATH:$GOROOT/bin
+# arm64 Homebrew — prepends /opt/homebrew/bin ahead of Intel /usr/local/bin so `go` is native arm64.
+# (Do NOT export GOROOT: let `go` use its own. A stale GOROOT pointing at a mismatched install
+#  causes "go: no such tool compile".)
+eval "$(/opt/homebrew/bin/brew shellenv)"
 export  GOPATH=~/projects/go
 export  PATH=$PATH:$GOPATH/bin
 
@@ -214,5 +215,43 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$PATH:/Users/bryansandoval/.local/bin"
 export AWS_SDK_LOAD_CONFIG=1
 
-which vimpager >/dev/null && export PAGER=vimpager || echo "vimpager not installed"
+#which vimpager >/dev/null && export PAGER=vimpager || echo "vimpager not installed"
 
+# For compilers to find ruby@3.0 you may need to set:
+#export LDFLAGS="-L/usr/local/opt/ruby@3.0/lib"
+#export CPPFLAGS="-I/usr/local/opt/ruby@3.0/include"
+
+# For pkg-config to find ruby@3.0 you may need to set:
+#export PKG_CONFIG_PATH="/usr/local/opt/ruby@3.0/lib/pkgconfig"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+export PAGER="less"
+
+#export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH="/usr/local/opt/openjdk@17/bin:$PATH"
+#export PATH=$JAVA_HOME/bin:$PATH
+
+export ANDROID_HOME=~/Library/Android/sdk
+export PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH
+
+jwtd() {
+  local input="${1:-}"
+  if [ -z "$input" ]; then
+    if [ ! -t 0 ]; then
+      input=$(cat /dev/stdin)
+    else
+      echo >&2 '✗ Need an argument or have a piped input!'
+      return 1
+    fi
+  fi
+
+  echo "Header:"
+  echo "$input" | jq -Rrce 'split(".")[0] | @base64d | fromjson'
+  echo "Payload:"
+  echo "$input" | jq -Rrce 'split(".")[1] | . + "=" * (. | 4 - length % 4) | @base64d | fromjson'
+}
+export CLICOLOR=1
+export LSCOLORS=ExFxCxDxBxegedabagacad
+
+# Timelord CLI — tl alias + tab completion
+source "/Users/bryansandoval/projects/timelord/cli/bin/timelord.profile"
+export PATH="/usr/local/opt/node@22/bin:$PATH"

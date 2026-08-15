@@ -62,3 +62,5 @@
 	trustExitCode = true
 [commit]
 	template = /Users/bryansandoval/.stCommitMsg
+[diff]
+	tool = default

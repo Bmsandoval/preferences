@@ -6,3 +6,5 @@ PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
 export PATH
 
 export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="/usr/local/mysql/bin/mysql:$PATH"
+export PATH="/usr/local/mysql/bin:$PATH"
