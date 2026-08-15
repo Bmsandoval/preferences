@@ -26,3 +26,5 @@
 /.claude/hooks/*
 !/.claude/hooks/block-destructive-git.sh
 !/.claude/hooks/test-block-destructive-git.sh
+!/.claude/hooks/settings.hooks.json
+!/.claude/hooks/install-git-guard.sh
