@@ -15,3 +15,14 @@
 !.bash_prompt
 !.taskbook.json
 !.i3blocks.conf
+
+# Claude Code: the git-destruction guard and the global instructions it enforces.
+# Whitelist ONLY these — .claude/ also holds settings.json, session transcripts,
+# and memory, and this repo is public.
+!/.claude
+/.claude/*
+!/.claude/CLAUDE.md
+!/.claude/hooks
+/.claude/hooks/*
+!/.claude/hooks/block-destructive-git.sh
+!/.claude/hooks/test-block-destructive-git.sh
